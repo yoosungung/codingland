@@ -7,7 +7,7 @@
 ## 현황
 
 문서 확정. **검토 우선순위: cognitive_review > design_review**(충돌 시). Graphify는 **개념 차용**(외부 서비스 비대상).  
-**M0 진행 중** — `extension/core` + `extension/host` stub. 상세: [`extension/DESIGN.md`](extension/DESIGN.md).
+**M0 Done** (PR #1). **M1 착수** — 마이크로월드(시나리오 1). 상세: [`extension/DESIGN.md`](extension/DESIGN.md).
 
 ## 제품·확정 결정
 
@@ -82,8 +82,9 @@ Gate는 **채점이 아니라 Spec 합의(Mirror)**.
 - ChangeScore 가중치·`sessionLoad` 산출식 (M3 실험 후 고정)
 - 로컬 LLM 런타임: Ollama vs node-llama (`extension/DESIGN.md`)
 - Gate 훅: SCM API vs husky (기본: SCM/커맨드 + 선택 husky)
-- AST 구현: ts-morph vs tree-sitter 패키지 (`extension/DESIGN.md`)
 - Leantime 동기화
+
+확정(M1): AST = **ts-morph** — 근거는 [`extension/DESIGN.md`](extension/DESIGN.md).
 
 ## 범위
 

@@ -2,11 +2,11 @@ import * as vscode from "vscode";
 import { SidebarProvider } from "./sidebarProvider";
 import { CanvasEditorProvider } from "./canvasEditorProvider";
 import { getPanel, showPanel } from "./panel";
-import { revealBeside } from "./revealBeside";
+import { revealBeside, type RevealBesidePayload } from "./revealBeside";
 
 export function activate(context: vscode.ExtensionContext): void {
   const panel = getPanel();
-  panel.appendLine("[codingland] host activate (M0 stub)");
+  panel.appendLine("[codingland] host activate (M1 microworld)");
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -19,28 +19,22 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.commands.registerCommand(
       "codingland.revealBeside",
-      async (uri?: vscode.Uri) => {
-        await revealBeside(uri);
+      async (uriOrPayload?: vscode.Uri | RevealBesidePayload | string) => {
+        await revealBeside(uriOrPayload);
       }
     ),
     vscode.commands.registerCommand("codingland.openCanvas", async () => {
-      const doc = await vscode.workspace.openTextDocument({
-        language: "json",
-        content: JSON.stringify(
-          { kind: "codingland.canvas", version: 0, stub: true },
-          null,
-          2
-        ),
-      });
-      // Untitled docs won't match *.codingland.json — write a temp workspace file if possible
       const folder = vscode.workspace.workspaceFolders?.[0];
       if (folder) {
-        const target = vscode.Uri.joinPath(folder.uri, ".codingland-canvas.codingland.json");
+        const target = vscode.Uri.joinPath(
+          folder.uri,
+          ".codingland-canvas.codingland.json"
+        );
         await vscode.workspace.fs.writeFile(
           target,
           Buffer.from(
             JSON.stringify(
-              { kind: "codingland.canvas", version: 0, stub: true },
+              { kind: "codingland.canvas", version: 1, milestone: "M1" },
               null,
               2
             ),
@@ -53,11 +47,14 @@ export function activate(context: vscode.ExtensionContext): void {
           CanvasEditorProvider.viewType
         );
       } else {
-        await vscode.window.showTextDocument(doc);
         vscode.window.showInformationMessage(
-          "Codingland: open a workspace folder to use the Canvas custom editor stub."
+          "Codingland: open a workspace folder to use the Canvas custom editor."
         );
       }
+    }),
+    vscode.commands.registerCommand("codingland.loadPaymentSample", async () => {
+      await vscode.commands.executeCommand("codingland.openCanvas");
+      await CanvasEditorProvider.loadPaymentSample(context);
     }),
     panel
   );

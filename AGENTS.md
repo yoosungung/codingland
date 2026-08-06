@@ -35,4 +35,4 @@ This file provides guidance to AI coding assistants (Claude Code, Codex, Gemini,
 
 ## 3. Status
 
-`extension/` M0 착수(core Jest + host Native stub). 계약·일정: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md). 내부: [`extension/DESIGN.md`](extension/DESIGN.md).
+`extension/` M1 착수(마이크로월드·ts-morph AST/KG). 계약·일정: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md). 내부: [`extension/DESIGN.md`](extension/DESIGN.md).
