@@ -6,7 +6,8 @@
 
 ## 현황
 
-문서 확정. **검토 우선순위: cognitive_review > design_review**(충돌 시). Graphify는 **개념 차용**(외부 서비스 비대상). 다음: **M0**.
+문서 확정. **검토 우선순위: cognitive_review > design_review**(충돌 시). Graphify는 **개념 차용**(외부 서비스 비대상).  
+**M0 진행 중** — `extension/core` + `extension/host` stub. 상세: [`extension/DESIGN.md`](extension/DESIGN.md).
 
 ## 제품·확정 결정
 

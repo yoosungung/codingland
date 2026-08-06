@@ -11,6 +11,12 @@ AI 코딩 에이전트가 만든 코드의 **인식적 부채(Epistemic Debt)**�
 
 ## Quickstart
 
-Extension 패키지(`extension/`)는 아직 없다. M0 착수 후 여기에 실행 방법을 추가하고, 상세 명령은 `extension/DESIGN.md` `## Commands`에 둔다.
+```bash
+cd extension
+npm install
+npm test      # core Jest (~1s) — vscode 런타임 불필요
+npm run compile
+```
 
-현재는 저장소를 클론한 뒤 위 문서부터 읽으면 된다.
+상세 명령·내부 설계: [`extension/DESIGN.md`](extension/DESIGN.md) `## Commands`.  
+F5/Extension Host 스모크는 M0 stub 등록 확인용(선택).
