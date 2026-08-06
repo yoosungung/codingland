@@ -1,0 +1,12 @@
+{
+  "name": "codingland-extension",
+  "private": true,
+  "workspaces": [
+    "core",
+    "host"
+  ],
+  "scripts": {
+    "test": "npm test -w @codingland/core",
+    "compile": "npm run compile -w @codingland/core && npm run compile -w codingland"
+  }
+}

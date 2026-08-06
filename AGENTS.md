@@ -35,4 +35,4 @@ This file provides guidance to AI coding assistants (Claude Code, Codex, Gemini,
 
 ## 3. Status
 
-문서 기반 기획 확정(`design_review`·`cognitive_review` 반영). 다음: `extension/` M0 ([ROADMAP.md](ROADMAP.md)).
+`extension/` M0 착수(core Jest + host Native stub). 계약·일정: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md). 내부: [`extension/DESIGN.md`](extension/DESIGN.md).
