@@ -55,7 +55,11 @@
       },
       {
         "command": "codingland.openCanvas",
-        "title": "Codingland: Open Canvas Stub"
+        "title": "Codingland: Open Canvas"
+      },
+      {
+        "command": "codingland.loadPaymentSample",
+        "title": "Codingland: Load Payment Middleware Sample"
       }
     ]
   },
