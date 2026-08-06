@@ -15,6 +15,7 @@ This file provides guidance to AI coding assistants (Claude Code, Codex, Gemini,
 | `README.md` | 저장소 방문자용 소개 + 로컬 quickstart | 루트 |
 | `ROADMAP.md` | 수행 계획(마일스톤·확정 결정·미결정) | 루트 |
 | `extension/DESIGN.md` | Extension *내부* 설계 + `## Commands` | `extension/` (코드 착수 시) |
+| `deploy/README.md` | 로컬 로드·VSIX 설치(+ 추후 Marketplace 런북) | `deploy/` |
 
 규칙:
 
@@ -23,7 +24,7 @@ This file provides guidance to AI coding assistants (Claude Code, Codex, Gemini,
 - **README.md vs ARCHITECTURE.md / DESIGN.md.** README는 **인간 독자**용. 계약·내부 설계는 링크로만.
 - `docs/**`는 gitignore(원본 PDF·검토 초안 로컬). 일정 정본은 루트 `ROADMAP.md`.
 - 파일이 새로 생기거나 용도가 바뀌면 위 표를 즉시 갱신한다.
-- 배포 런북·CI·k8s는 필요할 때 추가한다. **빈 stub을 만들지 않는다.**
+- 배포·로컬 설치 런북은 [`deploy/README.md`](deploy/README.md). CI·k8s는 필요할 때 추가한다. **빈 stub을 만들지 않는다.**
 
 ## 2. 수행 방법 (How we work in this repo)
 

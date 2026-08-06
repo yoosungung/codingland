@@ -56,3 +56,5 @@ core만:
 ```bash
 npm test -w @codingland/core
 ```
+
+VS Code/Cursor에 로컬 로드·VSIX 설치: [`../deploy/README.md`](../deploy/README.md).

@@ -7,6 +7,7 @@ AI 코딩 에이전트가 만든 코드의 **인식적 부채(Epistemic Debt)**�
 - 계약·인터페이스: [ARCHITECTURE.md](ARCHITECTURE.md)
 - 수행 계획: [ROADMAP.md](ROADMAP.md)
 - 에이전트 워크플로: [AGENTS.md](AGENTS.md)
+- 로컬 설치·VSIX: [deploy/README.md](deploy/README.md)
 - 지식 그래프 개념 참고: [Graphify](https://wiki.askwho.net/wiki/engineering/ai-native-engineering/graphify-codebase-knowledge-graph) (개념 차용; 외부 서비스 연동 아님 — [ARCHITECTURE](ARCHITECTURE.md) §1-14)
 
 ## Quickstart
@@ -19,4 +20,4 @@ npm run compile
 ```
 
 상세 명령·내부 설계: [`extension/DESIGN.md`](extension/DESIGN.md) `## Commands`.  
-F5/Extension Host 스모크는 M0 stub 등록 확인용(선택).
+Extension Host / VSIX 로컬 설치: [`deploy/README.md`](deploy/README.md).
