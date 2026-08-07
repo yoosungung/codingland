@@ -3,20 +3,25 @@ import {
   ProtocolEvents,
   PAYMENT_MIDDLEWARE_FILE,
   PAYMENT_MIDDLEWARE_SOURCE,
+  IsolatedRunner,
   applySemanticZoom,
   extractGraphFromSource,
   type GraphNode,
   type GraphSnapshot,
+  type RuntimeSnapshot,
   type ZoomLevel,
 } from "@codingland/core";
 import { revealBeside } from "./revealBeside";
+import { getPanel } from "./panel";
 
-/** Custom Editor (Canvas) — M1 boundary graph + Semantic Zoom + Beside. */
+/** Custom Editor (Canvas) — graph + zoom + Time Bar / Hot Reboot (M2). */
 export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
   public static readonly viewType = "codingland.canvas";
 
   private static panel: vscode.WebviewPanel | undefined;
   private static fullSnapshot: GraphSnapshot | undefined;
+  private static runner: IsolatedRunner | undefined;
+  private static timeline: RuntimeSnapshot[] = [];
 
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
     return vscode.window.registerCustomEditorProvider(
@@ -101,9 +106,23 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
 
     webviewPanel.webview.onDidReceiveMessage(async (msg) => {
       if (msg?.type === ProtocolEvents.RUNNER_HOT_REBOOT) {
+        const result = CanvasEditorProvider.ensureRunner().hotReboot();
+        CanvasEditorProvider.timeline = result.snapshots;
+        await CanvasEditorProvider.pushTimeline();
         void vscode.window.showInformationMessage(
-          "Codingland: Hot Reboot stub (no-op until M2)"
+          result.ok
+            ? `Codingland: Hot Reboot → ${result.checkpointId}`
+            : "Codingland: Hot Reboot failed (no checkpoint)"
         );
+        return;
+      }
+      if (msg?.type === ProtocolEvents.TIMELINE_ON_CHANGE_END) {
+        const snapshotId = msg.payload?.snapshotId as string | undefined;
+        if (snapshotId) {
+          getPanel().appendLine(
+            `[codingland] timeline.onChangeEnd ${snapshotId}`
+          );
+        }
         return;
       }
       if (msg?.type === ProtocolEvents.GRAPH_SELECT) {
@@ -121,6 +140,9 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
       }
     });
 
+    CanvasEditorProvider.ensureRunner();
+    await CanvasEditorProvider.pushTimeline();
+
     if (CanvasEditorProvider.fullSnapshot) {
       await CanvasEditorProvider.pushDelta();
     }
@@ -128,10 +150,39 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
     void document;
   }
 
+  private static ensureRunner(): IsolatedRunner {
+    if (!CanvasEditorProvider.runner) {
+      const runner = new IsolatedRunner({
+        mockIo: {
+          http: (req) => ({ status: 200, body: req }),
+        },
+      });
+      runner.recordCall("fp-charge", { amount: 10 }, "call");
+      runner.recordCall("fp-auth", { token: "live-token" }, "call");
+      runner.recordCall("fp-exception", { err: "boom" }, "exception");
+      runner.checkpoint("cp-before-exception");
+      CanvasEditorProvider.runner = runner;
+      CanvasEditorProvider.timeline = runner.snapshots();
+    }
+    return CanvasEditorProvider.runner;
+  }
+
+  private static async pushTimeline(): Promise<void> {
+    if (!CanvasEditorProvider.panel) {
+      return;
+    }
+    await CanvasEditorProvider.panel.webview.postMessage({
+      type: ProtocolEvents.TIMELINE_CACHE,
+      payload: CanvasEditorProvider.timeline,
+    });
+  }
+
   private getHtml(): string {
     const hotReboot = ProtocolEvents.RUNNER_HOT_REBOOT;
     const select = ProtocolEvents.GRAPH_SELECT;
     const delta = ProtocolEvents.GRAPH_DELTA;
+    const timelineCache = ProtocolEvents.TIMELINE_CACHE;
+    const timelineEnd = ProtocolEvents.TIMELINE_ON_CHANGE_END;
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -140,6 +191,7 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
   <style>
     body { margin: 0; font-family: var(--vscode-font-family); color: var(--vscode-foreground); background: var(--vscode-editor-background); display: flex; flex-direction: column; height: 100vh; }
     #time-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--vscode-panel-border); font-size: 12px; }
+    #time-bar input[type=range] { flex: 1; }
     #zoom { display: flex; gap: 6px; padding: 6px 12px; border-bottom: 1px solid var(--vscode-panel-border); font-size: 12px; }
     #canvas { flex: 1; position: relative; overflow: auto; }
     .node { position: absolute; min-width: 100px; padding: 8px 10px; border: 1px solid var(--vscode-panel-border); background: var(--vscode-editorWidget-background); cursor: pointer; font-size: 12px; }
@@ -150,8 +202,9 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
 </head>
 <body>
   <div id="time-bar" role="toolbar" aria-label="Time Bar">
-    <span>Time Bar (stub)</span>
-    <input type="range" min="0" max="100" value="0" aria-label="Timeline scrub" />
+    <span>Time Bar</span>
+    <input id="scrub" type="range" min="0" max="0" value="0" aria-label="Timeline scrub" />
+    <span id="scrub-label"></span>
     <button id="hot-reboot" type="button">Hot Reboot</button>
   </div>
   <div id="zoom" role="toolbar" aria-label="Semantic Zoom">
@@ -164,6 +217,18 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
   <div id="canvas" aria-label="Knowledge graph"></div>
   <script>
     const vscode = acquireVsCodeApi();
+    let timeline = [];
+    const scrub = document.getElementById('scrub');
+    const scrubLabel = document.getElementById('scrub-label');
+    function applyScrub() {
+      const idx = Number(scrub.value) || 0;
+      const snap = timeline[idx];
+      scrubLabel.textContent = snap ? (snap.marker + ' @' + snap.tMs) : '';
+      if (snap) {
+        vscode.postMessage({ type: '${timelineEnd}', payload: { snapshotId: snap.id } });
+      }
+    }
+    scrub.addEventListener('change', applyScrub);
     document.getElementById('hot-reboot').addEventListener('click', () => {
       vscode.postMessage({ type: '${hotReboot}', payload: {} });
     });
@@ -174,7 +239,15 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
     });
     window.addEventListener('message', (event) => {
       const msg = event.data;
-      if (!msg || msg.type !== '${delta}') return;
+      if (!msg) return;
+      if (msg.type === '${timelineCache}') {
+        timeline = Array.isArray(msg.payload) ? msg.payload : [];
+        scrub.max = Math.max(0, timeline.length - 1);
+        scrub.value = scrub.max;
+        applyScrub();
+        return;
+      }
+      if (msg.type !== '${delta}') return;
       const payload = msg.payload || {};
       const canvas = document.getElementById('canvas');
       canvas.innerHTML = '';
