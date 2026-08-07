@@ -6,7 +6,7 @@ import { revealBeside, type RevealBesidePayload } from "./revealBeside";
 
 export function activate(context: vscode.ExtensionContext): void {
   const panel = getPanel();
-  panel.appendLine("[codingland] host activate (M1 microworld)");
+  panel.appendLine("[codingland] host activate (M2 replay sandbox)");
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -34,7 +34,7 @@ export function activate(context: vscode.ExtensionContext): void {
           target,
           Buffer.from(
             JSON.stringify(
-              { kind: "codingland.canvas", version: 1, milestone: "M1" },
+              { kind: "codingland.canvas", version: 2, milestone: "M2" },
               null,
               2
             ),

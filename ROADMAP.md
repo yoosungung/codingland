@@ -7,7 +7,13 @@
 ## 현황
 
 문서 확정. **검토 우선순위: cognitive_review > design_review**(충돌 시). Graphify는 **개념 차용**(외부 서비스 비대상).  
-**M0 Done** (PR #1). **M1 착수** — 마이크로월드(시나리오 1). 상세: [`extension/DESIGN.md`](extension/DESIGN.md).
+**M0 Done** (PR #1). **M1 Done** (PR #2). **M2 착수** — Replay 샌드박스(시나리오 2). 상세: [`extension/DESIGN.md`](extension/DESIGN.md).
+
+## M2 — current
+
+- [x] Isolated Runner: Replay + Mock I/O; Hot Reboot; shallow Sanitizer
+- [x] Living Spec BDD + Jest stub (`scenarioId` 1:1)
+- [x] 성공 기준: 예외 직전 Replay+token 주입; Hot Reboot; BDD↔Jest 링크
 
 ## 제품·확정 결정
 

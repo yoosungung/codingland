@@ -32,6 +32,25 @@ export {
   PAYMENT_MIDDLEWARE_SOURCE,
 } from "./ast/paymentSample";
 export {
+  sanitize,
+  type SanitizeOptions,
+} from "./runtime/sanitize";
+export {
+  IsolatedRunner,
+  type HotRebootResult,
+  type MockIoHandler,
+  type ReplayRequest,
+  type ReplayResult,
+  type RunnerOptions,
+  type RuntimeSnapshot,
+  type StateInjectRequest,
+} from "./runtime/runner";
+export {
+  linkJestStub,
+  parseLivingSpec,
+  type LivingSpecArtifact,
+} from "./spec/livingSpec";
+export {
   ProtocolEvents,
   isProtocolEvent,
   parseEnvelope,
