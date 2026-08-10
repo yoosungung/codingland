@@ -88,6 +88,18 @@ export {
   type WalkthroughPayload,
 } from "./gate/session";
 export {
+  HeuristicMirrorAdapter,
+  buildHeuristicMirrorDraft,
+  draftMirrorForScore,
+  type MirrorAdapter,
+  type MirrorDraftRequest,
+} from "./gate/mirrorAdapter";
+export {
+  runGateSmoke,
+  type GateSmokeRequest,
+  type GateSmokeResult,
+} from "./gate/gateSmoke";
+export {
   queryGraphPath,
   type PathQueryOptions,
 } from "./graph/pathQuery";
