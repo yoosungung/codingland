@@ -13,10 +13,10 @@
 
 ## M3 범위 (이 문서 기준)
 
-- core: `computeChangeScore`(`sessionLoad` → tier 하향); Gate 세션(`none`/`light`/`full`); Walkthrough `queryGraphPath`; Consensus 없이 Pass 금지; `bypassAllowed`만 Bypass; `syncLivingSpec`; Bypass 커밋 태그
+- core: `computeChangeScore`(`sessionLoad` → tier 하향); Gate 세션(`none`/`light`/`full`); Walkthrough `queryGraphPath`; Consensus 없이 Pass 금지; `bypassAllowed`만 Bypass; `syncLivingSpec`; Bypass 커밋 태그; `HeuristicMirrorAdapter` + `runGateSmoke`
 - ChangeScore **실험 기본값**(ROADMAP 미결정 — M3 후 고정): severity = mean(entropy,coupling,criticality); sessionLoad≥0.7 → −0.25, ≥0.4 → −0.10; thresholds none<0.3 / light<0.6 / else full; `bypassAllowed` = criticality<0.7 or sessionLoad≥0.5 (attempt 횟수 비사용)
-- Jest: changeScore / gateSession / pathQuery / specSync 단위 테스트
-- host Gate UI·로컬 LLM Mirror 어댑터는 후속 커밋
+- host: Sidebar Gate 패널; `codingland.triggerGate` 커맨드(기본 Gate 훅); Heuristic Mirror 어댑터 배선 (Ollama/node-llama 미결정 → heuristic 기본)
+- Jest: changeScore / gateSession / pathQuery / specSync / mirrorAdapter / gateSmoke
 
 M3.1+(클라우드 Mirror)·외부 Graphify CLI는 여기 구현하지 않는다.
 
@@ -43,6 +43,7 @@ M3.1+(클라우드 Mirror)·외부 Graphify CLI는 여기 구현하지 않는다
 | Beside | `codingland.revealBeside` → `ViewColumn.Beside` (+ selection range) |
 | Time Bar / Hot Reboot | scrub → `timeline.onChangeEnd`; button → `runner.hotReboot` |
 | Sample | `codingland.loadPaymentSample` — fixture 그래프 → `graph.delta` |
+| Mirror Gate | `codingland.triggerGate` — ChangeScore→session→Sidebar/Panel; Heuristic Mirror |
 
 ## Commands
 

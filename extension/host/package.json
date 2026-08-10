@@ -60,6 +60,10 @@
       {
         "command": "codingland.loadPaymentSample",
         "title": "Codingland: Load Payment Middleware Sample"
+      },
+      {
+        "command": "codingland.triggerGate",
+        "title": "Codingland: Trigger Mirror Gate"
       }
     ]
   },

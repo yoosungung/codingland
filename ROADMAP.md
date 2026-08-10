@@ -22,7 +22,7 @@
 - [x] Walkthrough in-process path/subgraph 힌트
 - [x] 거부 시 점진 힌트·가벼운 modality; Bypass는 `bypassAllowed`만
 - [x] SpecSync; PR/커밋 Bypass 태그 (core 헬퍼)
-- [ ] host Gate UI·LLM Mirror 어댑터; 성공 기준 E2E를 host 스모크로 확장
+- [x] host Gate UI·Heuristic Mirror 어댑터·`runGateSmoke`/`codingland.triggerGate` (Ollama/node-llama는 미결정·후속)
 
 ## 제품·확정 결정
 
