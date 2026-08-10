@@ -7,13 +7,22 @@
 ## 현황
 
 문서 확정. **검토 우선순위: cognitive_review > design_review**(충돌 시). Graphify는 **개념 차용**(외부 서비스 비대상).  
-**M0 Done** (PR #1). **M1 Done** (PR #2). **M2 착수** — Replay 샌드박스(시나리오 2). 상세: [`extension/DESIGN.md`](extension/DESIGN.md).
+**M0 Done** (PR #1). **M1 Done** (PR #2). **M2 Done** (PR #3). **M3 착수** — 적응형 Mirror Gate(시나리오 3). 상세: [`extension/DESIGN.md`](extension/DESIGN.md).
 
-## M2 — current
+## M2 — done
 
 - [x] Isolated Runner: Replay + Mock I/O; Hot Reboot; shallow Sanitizer
 - [x] Living Spec BDD + Jest stub (`scenarioId` 1:1)
 - [x] 성공 기준: 예외 직전 Replay+token 주입; Hot Reboot; BDD↔Jest 링크
+
+## M3 — current
+
+- [x] ChangeScore(`sessionLoad` 포함) → friction tier; apply 즉시 잠금 없음
+- [x] `full`: Walkthrough → 멀티모달 Teach-back → MirrorDraft → Consensus (core 세션)
+- [x] Walkthrough in-process path/subgraph 힌트
+- [x] 거부 시 점진 힌트·가벼운 modality; Bypass는 `bypassAllowed`만
+- [x] SpecSync; PR/커밋 Bypass 태그 (core 헬퍼)
+- [ ] host Gate UI·LLM Mirror 어댑터; 성공 기준 E2E를 host 스모크로 확장
 
 ## 제품·확정 결정
 
