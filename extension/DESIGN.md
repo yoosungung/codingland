@@ -6,18 +6,19 @@
 
 | 경로 | 역할 |
 |------|------|
-| `core/` | 순수 TS (`vscode` import 금지). Graph·AST/KG·Debt·layout·Sanitizer·IsolatedRunner·Living Spec |
+| `core/` | 순수 TS (`vscode` import 금지). Graph·AST/KG·Debt·layout·Sanitizer·IsolatedRunner·Living Spec·ChangeScore·Gate |
 | `host/` | VS Code 어댑터. Sidebar·Custom Editor·Panel·Beside·Time Bar·Hot Reboot·commands |
 
 워크스페이스 루트는 `extension/package.json` (npm workspaces).
 
-## M2 범위 (이 문서 기준)
+## M3 범위 (이 문서 기준)
 
-- core: shallow Sanitizer(`maxDepth: 3`); in-process `IsolatedRunner`(Replay + Mock I/O + inject + Hot Reboot); Living Spec artifact + Jest `scenarioId` 1:1 링크
-- host: Time Bar scrub → `timeline.onChangeEnd`; Hot Reboot → `runner.hotReboot` (러너 세션)
-- Jest: sanitize / runner / livingSpec 단위 테스트
+- core: `computeChangeScore`(`sessionLoad` → tier 하향); Gate 세션(`none`/`light`/`full`); Walkthrough `queryGraphPath`; Consensus 없이 Pass 금지; `bypassAllowed`만 Bypass; `syncLivingSpec`; Bypass 커밋 태그
+- ChangeScore **실험 기본값**(ROADMAP 미결정 — M3 후 고정): severity = mean(entropy,coupling,criticality); sessionLoad≥0.7 → −0.25, ≥0.4 → −0.10; thresholds none<0.3 / light<0.6 / else full; `bypassAllowed` = criticality<0.7 or sessionLoad≥0.5 (attempt 횟수 비사용)
+- Jest: changeScore / gateSession / pathQuery / specSync 단위 테스트
+- host Gate UI·로컬 LLM Mirror 어댑터는 후속 커밋
 
-M3+(Mirror Gate·ChangeScore)·외부 Graphify CLI는 여기 구현하지 않는다.
+M3.1+(클라우드 Mirror)·외부 Graphify CLI는 여기 구현하지 않는다.
 
 ## 확정
 
@@ -25,11 +26,12 @@ M3+(Mirror Gate·ChangeScore)·외부 Graphify CLI는 여기 구현하지 않는
 |------|------|------|
 | AST (M1) | **ts-morph** | TS/JS 심볼 해석; tree-sitter는 M4+ |
 | Runner (M2) | **in-process** | soft TTD=입력 재실행(ARCHITECTURE §1.4); worker는 필요 시 M3+ |
+| ChangeScore 가중치 (M3 실험) | equal mean + sessionLoad 하향 | ROADMAP 미결정; 실험 후 고정 |
 
 ## 미결정 (이후 마일스톤)
 
-- 로컬 LLM 런타임: Ollama vs node-llama — M3
-- Gate 훅: SCM vs husky — M3
+- 로컬 LLM 런타임: Ollama vs node-llama — M3 후반
+- Gate 훅: SCM vs husky — M3 후반 (기본 SCM/커맨드)
 
 ## Host 표면
 

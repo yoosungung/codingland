@@ -51,9 +51,43 @@ export {
   type LivingSpecArtifact,
 } from "./spec/livingSpec";
 export {
+  BYPASS_COMMIT_TAG,
+  formatBypassCommitMessage,
+  syncLivingSpec,
+  type SpecSyncOp,
+  type SpecSyncResult,
+} from "./spec/specSync";
+export {
   ProtocolEvents,
   isProtocolEvent,
   parseEnvelope,
   type ProtocolEventType,
   type ProtocolEnvelope,
 } from "./protocol/events";
+export {
+  computeChangeScore,
+  type ChangeScore,
+  type ChangeScoreInput,
+  type FrictionTier,
+} from "./gate/changeScore";
+export {
+  applyConsensus,
+  applyTeachBack,
+  openGate,
+  rejectDraft,
+  requestBypass,
+  type BypassRecord,
+  type ConsensusResult,
+  type GatePhase,
+  type GateSession,
+  type GateTrigger,
+  type MirrorDraft,
+  type PreferredModality,
+  type TeachBackModality,
+  type TeachBackSubmission,
+  type WalkthroughPayload,
+} from "./gate/session";
+export {
+  queryGraphPath,
+  type PathQueryOptions,
+} from "./graph/pathQuery";
