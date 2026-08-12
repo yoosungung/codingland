@@ -1,0 +1,9 @@
+# Tenant quality gates for codingland (VS Code / Cursor extension).
+# QA uses Extension Host smoke — not a web browser base_url.
+# See wiki: inbox/pm/2026-08-12-vscode-extension-qa-gate.md
+# and wiki/Engineering/AI-Native-Engineering/Tenant-Quality-Yaml-Gate-Skip-Pattern.md
+
+e2e:
+  # Not a web base_url — Extension Host command gate
+  command: "npm --prefix extension run test:vscode"
+  scenarios_path: e2e/scenarios
