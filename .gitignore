@@ -4,4 +4,5 @@ node_modules/
 extension/**/node_modules/
 extension/core/dist/
 extension/host/out/
+extension/host/.vscode-test/
 *.tsbuildinfo

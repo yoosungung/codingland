@@ -87,6 +87,9 @@
 npm install          # workspaces: core + host
 npm test             # core Jest
 npm run compile -w codingland   # host tsc → out/
+npm run test:vscode  # Extension Host smoke (@vscode/test-cli); Linux headless → xvfb-run
+# Optional: VSCODE_EXECUTABLE_PATH=/path/to/code|codium  (skips download)
+# If update.code.visualstudio.com is unreachable, script falls back to GitHub VSCodium.
 ```
 
 core만:
@@ -94,6 +97,8 @@ core만:
 ```bash
 npm test -w @codingland/core
 ```
+
+QA 게이트(테넌트): 저장소 루트 [`.factory/quality.yaml`](../.factory/quality.yaml) `e2e.command` → `npm --prefix extension run test:vscode` (브라우저 `base_url` 아님). 시나리오 메모: [`e2e/scenarios/`](../e2e/scenarios/).
 
 VS Code/Cursor에 로컬 로드·VSIX 설치: [`../deploy/README.md`](../deploy/README.md).  
 (`codingland.scanWorkspace` 등 새 호스트 커맨드 npm 스크립트는 **구현 착수 시** 이 절에 추가한다.)

@@ -15,8 +15,9 @@ AI 코딩 에이전트가 만든 코드의 **인식적 부채(Epistemic Debt)**�
 ```bash
 cd extension
 npm install
-npm test      # core Jest (~1s) — vscode 런타임 불필요
+npm test           # core Jest (~1s) — vscode 런타임 불필요
 npm run compile
+npm run test:vscode  # Extension Host smoke (QA e2e.command) — Linux headless needs xvfb
 ```
 
 상세 명령·내부 설계: [`extension/DESIGN.md`](extension/DESIGN.md) `## Commands`.  
