@@ -1,6 +1,6 @@
 /** ARCHITECTURE §4.2 Isolated Debug Runner — soft TTD Replay (in-process). */
 
-import { sanitize } from "./sanitize";
+import { DEFAULT_SANITIZE_OPTIONS, sanitize } from "./sanitize";
 
 export interface RuntimeSnapshot {
   id: string;
@@ -45,11 +45,7 @@ export interface HotRebootResult {
   snapshots: RuntimeSnapshot[];
 }
 
-const DEFAULT_SANITIZE = {
-  maxDepth: 3 as const,
-  namePatterns: ["password", "token", "secret"],
-  astSensitiveParams: [] as string[],
-};
+const DEFAULT_SANITIZE = DEFAULT_SANITIZE_OPTIONS;
 
 function fieldsFromUnknown(
   fields: Record<string, unknown>
