@@ -36,4 +36,4 @@ This file provides guidance to AI coding assistants (Claude Code, Codex, Gemini,
 
 ## 3. Status
 
-`extension/` M3 착수(Mirror Gate·ChangeScore·Living Spec). 계약·일정: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md). 내부: [`extension/DESIGN.md`](extension/DESIGN.md).
+`extension/` **제품화 착수**(M3.1 Gate 안정화 → M4 Workspace Ingest → M5–M7 VSIX dogfood Done). 계약·일정: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md). 내부: [`extension/DESIGN.md`](extension/DESIGN.md). 로컬 설치: [`deploy/README.md`](deploy/README.md).

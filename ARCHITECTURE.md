@@ -21,7 +21,8 @@ Codingland 컴포넌트 *간* 불변 계약과 인터페이스 형태. 마일스
 11. **Simulation-to-Test.** 검증된 inject+경로는 Living Spec **BDD 시나리오**와 동일 `scenarioId`의 Jest와 1:1. 고아 Jest 금지.
 12. **코드 reveal.** `ViewColumn.Beside` (Custom Editor를 코드 탭으로 교체하지 않음).
 13. **순수 코어 분리.** AST·Sanitizer·Delta·마찰 점수·fingerprint·정적 KG는 `vscode.*` 비의존 패키지; Host는 어댑터만.
-14. **지식 그래프 개념(Graphify에서 차용).** Codingland가 소유하는 정적 관계는 **호출·의존·포함** 그래프이며, 엣지에 **`extracted`(AST에서 확정) vs `inferred`(추론)** 구분을 둔다. Debt/`verified`에는 **extracted만** 집계한다. `path`/`query`식 부분그래프 탐색은 Walkthrough·ChangeScore **개념**으로 core에 구현한다. **외부 Graphify CLI·SaaS·Neo4j·원격 MCP·`graphify-out/` 파일 감시·`graph.html` 임베드는 통합 대상이 아니다.** 필요 시 tree-sitter 등 **라이브러리 패키지**를 `extension/core` 의존성으로만 넣는다 (프로세스 내).
+14. **지식 그래프 개념(Graphify에서 차용).** Codingland가 소유하는 정적 관계는 **호출·의존·포함** 그래프이며, 엣지에 **`extracted`(AST에서 확정) vs `inferred`(추론)** 구분을 둔다. Debt/`verified`에는 **extracted만** 집계한다. `path`/`query`식 부분그래프 탐색은 Walkthrough·ChangeScore **개념**으로 core에 구현한다. **외부 Graphify CLI·SaaS·Neo4j·원격 MCP·`graphify-out/` 파일 감시·`graph.html` 임베드는 통합 대상이 아니다.** 이와 별개로, Codingland **자체** Workspace Ingest(워크스페이스 스캔·증분 갱신)는 Host가 VS Code `FileSystemWatcher` / `onDidSave` 등으로 구동하고 core GraphStore에 병합하는 것이 **허용·필수(제품화)** 이다 — Graphify 산출물 감시가 아니다. 필요 시 tree-sitter 등 **라이브러리 패키지**를 `extension/core` 의존성으로만 넣는다 (프로세스 내).
+15. **Workspace Ingest.** 임의 워크스페이스에서 지원 언어 소스를 in-process로 추출해 GraphStore에 넣는다. 전체 스냅샷은 세션/스캔 시작 시에만; 이후는 Delta. exclude 글롭으로 `node_modules` 등 제외. 언어 순서·도구는 [ROADMAP](ROADMAP.md)(TS/JS→Python→Rust).
 
 ## 2. 컴포넌트 경계
 
@@ -31,8 +32,8 @@ Codingland 컴포넌트 *간* 불변 계약과 인터페이스 형태. 마일스
 | Custom Editor Webview (Canvas) | 그래프, Time Bar, Injector UI, Local Cache, **Mental-Map Preserving** layout | 파일 I/O, Mirror 호출 |
 | Native TextEditor | 소스; Beside reveal/highlight | AST 엔진 |
 | Native Panel | Mirror/Bypass/Sanitize/CLI 로그, Run 콘솔 | 합의 UX(Sidebar) |
-| Extension Host (adapter) | vscode API, Enforcement 훅, SpecSync, message bridge | 순수 분석 로직 |
-| Pure core (`extension/core`) | AST/KG map, fingerprint, edge confidence(`extracted`/`inferred`), path·subgraph query, Sanitizer, Delta, friction score, Spec draft helpers | vscode import; 외부 Graphify 서비스/CLI |
+| Extension Host (adapter) | vscode API, Enforcement 훅, SpecSync, message bridge, **Workspace Ingest 스케줄**(스캔 Progress·watcher·onDidSave) | 순수 분석 로직 |
+| Pure core (`extension/core`) | AST/KG map, **GraphStore**, fingerprint, edge confidence(`extracted`/`inferred`), path·subgraph query, Sanitizer, Delta, friction score, Spec draft helpers | vscode import; 외부 Graphify 서비스/CLI |
 | Isolated Debug Runner | Replay 세션, Mock I/O, Snapshot(요약), State Inject | UI, Spec 기록 |
 | SpecSync | fingerprint 매핑, rename/delete 사이드카 동기화 | Judge |
 
@@ -105,6 +106,28 @@ interface GraphPathResult {
   edgeIds: string[];
   /** extracted 경로만 기본; inferred 포함은 명시 옵트인 */
   confidence: EdgeConfidence;
+}
+
+/** 제품화 Ingest — core 소유 저장소; Host는 I/O·스케줄만 */
+interface GraphStoreSnapshot {
+  graph: GraphSnapshot;
+  /** uri → 해당 파일에서 나온 node/edge id (증분 제거용) */
+  uriIndex: Record<string, { nodeIds: string[]; edgeIds: string[] }>;
+}
+
+interface WorkspaceIngestRequest {
+  /** 전체 재스캔 vs 단일/복수 uri 증분 */
+  mode: "full" | "incremental";
+  uris?: string[];
+  /** Host가 적용한 exclude 결과 경로만 전달 */
+  includeGlobs?: string[];
+  excludeGlobs?: string[];
+}
+
+interface WorkspaceIngestResult {
+  delta: GraphDelta;
+  store: GraphStoreSnapshot;
+  stats: { filesTouched: number; nodesUpserted: number; cancelled?: boolean };
 }
 ```
 
@@ -233,8 +256,11 @@ interface SanitizeOptions {
 
 | 이벤트 | 방향 | 페이로드 |
 |--------|------|----------|
-| `graph.full` | → Canvas | `GraphSnapshot` (세션 시작만) |
+| `graph.full` | → Canvas | `GraphSnapshot` (세션/스캔 시작만) |
 | `graph.delta` | → Canvas | `GraphDelta` |
+| `ingest.request` | host→core | `WorkspaceIngestRequest` |
+| `ingest.progress` | → Panel | `{ filesDone, filesTotal?, uri? }` |
+| `ingest.result` | host | `WorkspaceIngestResult` |
 | `graph.select` | ← Canvas | `{ nodeId }` |
 | `graph.path.query` | ← Sidebar | `GraphPathQuery` |
 | `graph.path.result` | → Sidebar/Canvas | `GraphPathResult` |
