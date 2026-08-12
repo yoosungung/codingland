@@ -14,7 +14,7 @@
 ## M3 범위 (이 문서 기준)
 
 - core: `computeChangeScore`(`sessionLoad` → tier 하향); Gate 세션(`none`/`light`/`full`); Walkthrough `queryGraphPath`; Consensus 없이 Pass 금지; `bypassAllowed`만 Bypass; `syncLivingSpec`; Bypass 커밋 태그; `HeuristicMirrorAdapter` + `runGateSmoke`
-- ChangeScore **실험 기본값**(ROADMAP 미결정 — M3 후 고정): severity = mean(entropy,coupling,criticality); sessionLoad≥0.7 → −0.25, ≥0.4 → −0.10; thresholds none<0.3 / light<0.6 / else full; `bypassAllowed` = criticality<0.7 or sessionLoad≥0.5 (attempt 횟수 비사용)
+- ChangeScore **실험 기본값**(ROADMAP 미결정 — M3 후 고정): severity = mean(entropy,coupling,criticality); sessionLoad≥0.7 → −0.25, ≥0.4 → −0.15; thresholds none<0.3 / light<0.6 / else full; `bypassAllowed` = criticality<0.7 or sessionLoad≥0.5 (attempt 횟수 비사용). Named constants in `changeScore.ts` (`SESSION_LOAD_PENALTY_*` 등)
 - host: Sidebar Gate 패널; `codingland.triggerGate` 커맨드(기본 Gate 훅); Heuristic Mirror 어댑터 배선 (Ollama/node-llama 미결정 → heuristic 기본)
 - Jest: changeScore / gateSession / pathQuery / specSync / mirrorAdapter / gateSmoke / sanitize / cloudMirror
 
@@ -32,7 +32,7 @@
 |------|------|------|
 | AST (M1) | **ts-morph** | TS/JS 심볼 해석; tree-sitter는 M4+ |
 | Runner (M2) | **in-process** | soft TTD=입력 재실행(ARCHITECTURE §1.4); worker는 필요 시 M3+ |
-| ChangeScore 가중치 (M3 실험) | equal mean + sessionLoad 하향 | ROADMAP 미결정; 실험 후 고정 |
+| ChangeScore 가중치 (M3 실험) | equal mean + sessionLoad 하향 (mid −0.15) | ROADMAP 미결정; 실험 후 고정 (#544) |
 
 ## 미결정 (이후 마일스톤)
 

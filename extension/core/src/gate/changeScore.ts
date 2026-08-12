@@ -18,6 +18,16 @@ export interface ChangeScore {
   bypassAllowed: boolean;
 }
 
+/** M3 experimental defaults — see extension/DESIGN.md (ROADMAP 미결정). */
+export const SESSION_LOAD_PENALTY_HIGH = 0.25;
+export const SESSION_LOAD_PENALTY_MID = 0.15;
+export const SESSION_LOAD_THRESHOLD_HIGH = 0.7;
+export const SESSION_LOAD_THRESHOLD_MID = 0.4;
+export const TIER_THRESHOLD_NONE = 0.3;
+export const TIER_THRESHOLD_LIGHT = 0.6;
+export const BYPASS_CRITICALITY_MAX = 0.7;
+export const BYPASS_SESSION_LOAD_MIN = 0.5;
+
 function clamp01(n: number): number {
   if (Number.isNaN(n)) {
     return 0;
@@ -25,22 +35,21 @@ function clamp01(n: number): number {
   return Math.min(1, Math.max(0, n));
 }
 
-/** M3 experimental defaults — see extension/DESIGN.md. */
 function sessionLoadPenalty(sessionLoad: number): number {
-  if (sessionLoad >= 0.7) {
-    return 0.25;
+  if (sessionLoad >= SESSION_LOAD_THRESHOLD_HIGH) {
+    return SESSION_LOAD_PENALTY_HIGH;
   }
-  if (sessionLoad >= 0.4) {
-    return 0.1;
+  if (sessionLoad >= SESSION_LOAD_THRESHOLD_MID) {
+    return SESSION_LOAD_PENALTY_MID;
   }
   return 0;
 }
 
 function tierFromSeverity(severity: number): FrictionTier {
-  if (severity < 0.3) {
+  if (severity < TIER_THRESHOLD_NONE) {
     return "none";
   }
-  if (severity < 0.6) {
+  if (severity < TIER_THRESHOLD_LIGHT) {
     return "light";
   }
   return "full";
@@ -59,7 +68,9 @@ export function computeChangeScore(input: ChangeScoreInput): ChangeScore {
   const severity =
     (entropy + coupling + criticality) / 3 - sessionLoadPenalty(sessionLoad);
   const tier = tierFromSeverity(severity);
-  const bypassAllowed = criticality < 0.7 || sessionLoad >= 0.5;
+  const bypassAllowed =
+    criticality < BYPASS_CRITICALITY_MAX ||
+    sessionLoad >= BYPASS_SESSION_LOAD_MIN;
 
   return {
     entropy,

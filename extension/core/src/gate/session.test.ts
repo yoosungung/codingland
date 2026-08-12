@@ -32,7 +32,8 @@ function scoreForTier(
     entropy: 0.85,
     coupling: 0.85,
     criticality: bypassAllowed ? 0.5 : 0.9,
-    sessionLoad: bypassAllowed ? 0.55 : 0.1,
+    // keep sessionLoad below mid-band so full fixtures stay full after #544 mid penalty
+    sessionLoad: 0.1,
   });
   expect(s.tier).toBe("full");
   expect(s.bypassAllowed).toBe(bypassAllowed);
