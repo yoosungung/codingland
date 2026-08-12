@@ -8,6 +8,6 @@
   "scripts": {
     "test": "npm test -w @codingland/core",
     "compile": "npm run compile -w @codingland/core && npm run compile -w codingland",
-    "test:vscode": "npm run compile -w codingland && node ./scripts/run-vscode-test.cjs"
+    "test:vscode": "npm run compile && node ./scripts/run-vscode-test.cjs"
   }
 }
