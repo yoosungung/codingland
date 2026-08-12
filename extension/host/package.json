@@ -65,7 +65,17 @@
         "command": "codingland.triggerGate",
         "title": "Codingland: Trigger Mirror Gate"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Codingland",
+      "properties": {
+        "codingland.mirror.cloudOptIn": {
+          "type": "boolean",
+          "default": false,
+          "description": "Opt in to cloud Mirror draft path (default off; local Heuristic Mirror). Inputs are sanitized before egress (ARCHITECTURE §1.8)."
+        }
+      }
+    }
   },
   "scripts": {
     "compile": "tsc -p ./",

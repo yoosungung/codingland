@@ -6,6 +6,13 @@ export interface SanitizeOptions {
   astSensitiveParams: string[];
 }
 
+/** Default name patterns for Runner / Mirror / cloud opt-in paths. */
+export const DEFAULT_SANITIZE_OPTIONS: SanitizeOptions = {
+  maxDepth: 3,
+  namePatterns: ["password", "token", "secret"],
+  astSensitiveParams: [],
+};
+
 const REDACTED = "[REDACTED]";
 const MAX_DEPTH = "[MAX_DEPTH]";
 

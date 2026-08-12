@@ -2,9 +2,11 @@ import * as vscode from "vscode";
 import {
   ProtocolEvents,
   computeChangeScore,
+  resolveMirrorAdapter,
   runGateSmoke,
   type ChangeScoreInput,
   type GateSmokeResult,
+  type MirrorBackendKind,
 } from "@codingland/core";
 import { getPanel } from "./panel";
 import type { SidebarProvider } from "./sidebarProvider";
@@ -13,6 +15,8 @@ export interface TriggerGateArgs extends Partial<ChangeScoreInput> {
   uris?: string[];
   accept?: boolean;
   summary?: string;
+  /** Override settings; when omitted, reads codingland.mirror.cloudOptIn. */
+  cloudOptIn?: boolean;
 }
 
 /**
@@ -21,6 +25,18 @@ export interface TriggerGateArgs extends Partial<ChangeScoreInput> {
  */
 export class GateHost {
   constructor(private readonly sidebar: SidebarProvider) {}
+
+  /** Read cloud Mirror opt-in (default false). */
+  readCloudOptIn(override?: boolean): boolean {
+    if (typeof override === "boolean") {
+      return override;
+    }
+    return (
+      vscode.workspace
+        .getConfiguration("codingland.mirror")
+        .get<boolean>("cloudOptIn", false) === true
+    );
+  }
 
   async trigger(args: TriggerGateArgs = {}): Promise<GateSmokeResult> {
     const scoreInput: ChangeScoreInput = {
@@ -36,14 +52,23 @@ export class GateHost {
       "untitled:gate";
     const uriList = Array.isArray(uris) ? uris : [uris];
 
+    const cloudOptIn = this.readCloudOptIn(args.cloudOptIn);
+    const resolved = resolveMirrorAdapter({ cloudOptIn });
+    const backend: MirrorBackendKind = resolved.kind;
+
     const panel = getPanel();
     panel.appendLine(
-      `[gate.trigger] tier=${score.tier} sessionLoad=${score.sessionLoad} bypassAllowed=${score.bypassAllowed}`
+      `[gate.trigger] tier=${score.tier} sessionLoad=${score.sessionLoad} bypassAllowed=${score.bypassAllowed} mirror=${backend}`
     );
 
     this.sidebar.postGate({
       type: ProtocolEvents.GATE_TRIGGER,
-      payload: { reason: "verify", uris: uriList, score },
+      payload: {
+        reason: "verify",
+        uris: uriList,
+        score,
+        mirrorBackend: backend,
+      },
     });
 
     const result = await runGateSmoke({
@@ -51,6 +76,7 @@ export class GateHost {
       uris: uriList,
       reason: "verify",
       accept: args.accept !== false,
+      adapter: resolved.adapter,
       walkthrough:
         score.tier === "full"
           ? {
@@ -77,6 +103,7 @@ export class GateHost {
         payload: {
           livingSpecMarkdown: result.draftMarkdown,
           questions: [],
+          mirrorBackend: backend,
         },
       });
     }
@@ -89,7 +116,7 @@ export class GateHost {
     }
 
     panel.appendLine(
-      `[gate.result] scoreTier=${result.scoreTier} phase=${result.session.phase} passed=${result.passed}`
+      `[gate.result] scoreTier=${result.scoreTier} phase=${result.session.phase} passed=${result.passed} mirror=${backend}`
     );
     this.sidebar.renderGateResult(result);
     return result;
