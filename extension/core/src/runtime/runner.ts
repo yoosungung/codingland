@@ -45,12 +45,10 @@ export interface HotRebootResult {
   snapshots: RuntimeSnapshot[];
 }
 
-const DEFAULT_SANITIZE = DEFAULT_SANITIZE_OPTIONS;
-
 function fieldsFromUnknown(
   fields: Record<string, unknown>
 ): Record<string, string> {
-  const sanitized = sanitize(fields, DEFAULT_SANITIZE) as Record<
+  const sanitized = sanitize(fields, DEFAULT_SANITIZE_OPTIONS) as Record<
     string,
     unknown
   >;
@@ -114,7 +112,7 @@ export class IsolatedRunner {
       return { ok: false, snapshots: [] };
     }
     // Validate sanitized inputs (ARCHITECTURE: inputsJson is sanitized)
-    void sanitize(JSON.parse(request.inputsJson), DEFAULT_SANITIZE);
+    void sanitize(JSON.parse(request.inputsJson), DEFAULT_SANITIZE_OPTIONS);
 
     const played: RuntimeSnapshot[] = [];
     for (let i = start; i < this.tape.length; i++) {
