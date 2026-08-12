@@ -86,9 +86,11 @@
 ```bash
 npm install          # workspaces: core + host
 npm test             # core Jest
-npm run compile -w codingland   # host tsc → out/
-npm run test:vscode  # Extension Host smoke (@vscode/test-cli); Linux headless → xvfb-run
-# Optional: VSCODE_EXECUTABLE_PATH=/path/to/code|codium  (skips download)
+npm run compile      # core dist/ then host out/
+npm run test:vscode  # full compile + Extension Host smoke (@vscode/test-cli)
+# Linux headless Pod/CI: needs xvfb + Electron libs (libgtk-3-0, libnss3, libgbm1, libasound2, …);
+# wrapper auto-uses xvfb-run when DISPLAY is empty.
+# Optional: VSCODE_EXECUTABLE_PATH=/path/to/code|codium  (skips download; preferred in locked-down CI)
 # If update.code.visualstudio.com is unreachable, script falls back to GitHub VSCodium.
 ```
 
@@ -98,7 +100,7 @@ core만:
 npm test -w @codingland/core
 ```
 
-QA 게이트(테넌트): 저장소 루트 [`.factory/quality.yaml`](../.factory/quality.yaml) `e2e.command` → `npm --prefix extension run test:vscode` (브라우저 `base_url` 아님). 시나리오 메모: [`e2e/scenarios/`](../e2e/scenarios/).
+QA 게이트(테넌트): 저장소 루트 [`.factory/quality.yaml`](../.factory/quality.yaml) `e2e.command` → `npm --prefix extension run test:vscode` (브라우저 `base_url` 아님). `test:vscode`는 **core를 먼저** 컴파일한 뒤 host를 빌드한다(클린 sync에서 `@codingland/core` 해석 실패 방지). 시나리오 메모: [`e2e/scenarios/`](../e2e/scenarios/).
 
 VS Code/Cursor에 로컬 로드·VSIX 설치: [`../deploy/README.md`](../deploy/README.md).  
 (`codingland.scanWorkspace` 등 새 호스트 커맨드 npm 스크립트는 **구현 착수 시** 이 절에 추가한다.)
