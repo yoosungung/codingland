@@ -33,6 +33,7 @@ export {
 } from "./ast/paymentSample";
 export {
   sanitize,
+  DEFAULT_SANITIZE_OPTIONS,
   type SanitizeOptions,
 } from "./runtime/sanitize";
 export {
@@ -94,6 +95,14 @@ export {
   type MirrorAdapter,
   type MirrorDraftRequest,
 } from "./gate/mirrorAdapter";
+export {
+  CloudMirrorAdapter,
+  resolveMirrorAdapter,
+  sanitizeMirrorRequest,
+  type MirrorBackendKind,
+  type ResolveMirrorAdapterOptions,
+  type ResolvedMirrorAdapter,
+} from "./gate/cloudMirror";
 export {
   runGateSmoke,
   type GateSmokeRequest,
