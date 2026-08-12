@@ -1,6 +1,14 @@
-import { computeChangeScore } from "./changeScore";
+import {
+  computeChangeScore,
+  SESSION_LOAD_PENALTY_HIGH,
+  SESSION_LOAD_PENALTY_MID,
+} from "./changeScore";
 
 describe("computeChangeScore", () => {
+  it("exposes experimental sessionLoad penalty constants", () => {
+    expect(SESSION_LOAD_PENALTY_HIGH).toBe(0.25);
+    expect(SESSION_LOAD_PENALTY_MID).toBe(0.15);
+  });
   it("maps low severity to none without sessionLoad pressure", () => {
     const score = computeChangeScore({
       entropy: 0.1,
@@ -48,6 +56,25 @@ describe("computeChangeScore", () => {
       sessionLoad: 0.75,
     });
     expect(loaded.tier).toBe("light");
+  });
+
+  it("downshifts full → light at mid-band sessionLoad (mean 0.72 @ 0.45)", () => {
+    const base = computeChangeScore({
+      entropy: 0.72,
+      coupling: 0.72,
+      criticality: 0.72,
+      sessionLoad: 0,
+    });
+    expect(base.tier).toBe("full");
+
+    // mid penalty 0.15: 0.72−0.15=0.57 → light (0.10 would leave 0.62 → full)
+    const midBand = computeChangeScore({
+      entropy: 0.72,
+      coupling: 0.72,
+      criticality: 0.72,
+      sessionLoad: 0.45,
+    });
+    expect(midBand.tier).toBe("light");
   });
 
   it("does not lock apply — score is pure (no side effects)", () => {

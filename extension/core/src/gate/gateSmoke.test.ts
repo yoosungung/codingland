@@ -50,7 +50,7 @@ describe("runGateSmoke (host E2E stand-in)", () => {
         entropy: 0.85,
         coupling: 0.85,
         criticality: 0.5,
-        sessionLoad: 0.55,
+        sessionLoad: 0.1,
       },
       uris: ["file:///a.ts"],
       walkthrough: {
