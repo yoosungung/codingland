@@ -18,7 +18,7 @@
 - host: Sidebar Gate 패널; `codingland.triggerGate` 커맨드; Heuristic Mirror 어댑터 배선
 - Jest: changeScore / gateSession / pathQuery / specSync / mirrorAdapter / gateSmoke / sanitize / cloudMirror
 
-## M3.1 범위 (current)
+## M3.1 범위 (완료)
 
 - core: Sanitizer 단위/회귀 테스트 보강 (AST/이름 + depth≤3); `resolveMirrorAdapter` — 기본 **local**(Heuristic), `cloudOptIn`일 때만 Cloud 경로; Cloud 경로 입력은 Sanitizer 필수
 - host: `codingland.mirror.cloudOptIn` (default `false`) + GateHost가 어댑터 선택
@@ -27,7 +27,7 @@
 
 외부 Graphify CLI는 여기 구현하지 않는다.
 
-## M4 범위 (Workspace Ingest · TS/JS)
+## M4 범위 (Workspace Ingest · TS/JS · current)
 
 - core: 다파일 extract → GraphStore 병합(fingerprint·uriIndex); exclude 글롭 헬퍼
 - host: `codingland.scanWorkspace`; 워크스페이스 열기 시 백그라운드 스캔 + Progress; `onDidSave`/FileSystemWatcher 증분; Canvas는 GraphStore 기반(샘플 없이도 표시)

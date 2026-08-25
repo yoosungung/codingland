@@ -7,7 +7,7 @@
 ## 현황
 
 문서 확정. **검토 우선순위: cognitive_review > design_review**(충돌 시). Graphify는 **개념 차용**(외부 서비스·외부 CLI·`graphify-out/` 감시 비대상; **자체** Workspace Ingest 감시는 허용 — [ARCHITECTURE](ARCHITECTURE.md) §1.14).  
-**M0–M2 Done** (PR #1–#3). **M3 Done**(core/host Gate). **제품화 착수: M3.1 → M4–M7**(1차 Done = 내부 VSIX dogfood). 상세: [`extension/DESIGN.md`](extension/DESIGN.md).
+**M0–M3.1 Done** (PR #1–#9). **M4 current** — Workspace Ingest (TS/JS). **제품화: M4 → M5–M7**(1차 Done = 내부 VSIX dogfood). 상세: [`extension/DESIGN.md`](extension/DESIGN.md).
 
 ## M2 — done
 
@@ -23,6 +23,19 @@
 - [x] 거부 시 점진 힌트·가벼운 modality; Bypass는 `bypassAllowed`만
 - [x] SpecSync; PR/커밋 Bypass 태그 (core 헬퍼)
 - [x] host Gate UI·Heuristic Mirror 어댑터·`runGateSmoke`/`codingland.triggerGate`
+
+## M3.1 — done
+
+- [x] ChangeScore/`sessionLoad` 실험값 → 고정 후보 문서화 (#544)
+- [x] Sanitizer 회귀 강화; `cloudOptIn` 경로 Sanitizer 필수(실클라우드 HTTP Non-goal)
+- [x] 성공 기준: core 테스트 통과; Gate `none`/`light`/`full` 스모크가 문서 수치와 일치
+
+## M4 — current
+
+- [ ] `extension/core`: 다파일 extract + GraphStore 병합(fingerprint 키); exclude(`node_modules`, `dist`, `.git` 등)
+- [ ] `extension/host`: `codingland.scanWorkspace` / 열기 시 백그라운드 스캔 + Progress; 저장·생성·삭제 **증분**; Canvas는 샘플 없이도 그래프
+- [ ] VSIX: `.vscodeignore` + core 번들(또는 필요 파일만) → `cursor --install-extension` 성공
+- [ ] **성공 기준**: 임의 TS/JS 워크스페이스에서 Open Canvas → 경계 그래프 + Beside; 저장 후 Delta; 외부 Graphify 없음
 
 ## 제품·확정 결정
 
@@ -89,13 +102,13 @@ Gate는 **채점이 아니라 Spec 합의(Mirror)**.
 - SpecSync; PR/커밋 Bypass 태그
 - **성공 기준**: `none`/`light`/`full` E2E; 합의 없이 Pass 없음; sessionLoad 높을 때 tier 하향 검증
 
-### M3.1 — Gate 안정화 — current
+### M3.1 — Gate 안정화 — done
 
 - ChangeScore/`sessionLoad` **실험값 → 고정 후보 문서화**(#544)
 - Sanitizer 회귀 강화; `cloudOptIn` 경로 Sanitizer 필수(실클라우드 HTTP Non-goal)
 - **성공 기준**: core 테스트 통과; Gate `none`/`light`/`full` 스모크가 문서 수치와 일치
 
-### M4 — Workspace Ingest (TS/JS)
+### M4 — Workspace Ingest (TS/JS) — current
 
 - `extension/core`: 다파일 extract + GraphStore 병합(fingerprint 키); exclude(`node_modules`, `dist`, `.git` 등)
 - `extension/host`: `codingland.scanWorkspace` / 열기 시 백그라운드 스캔 + Progress; 저장·생성·삭제 **증분**; Canvas는 샘플 없이도 그래프

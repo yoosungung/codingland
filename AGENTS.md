@@ -37,4 +37,4 @@ This file provides guidance to AI coding assistants (Claude Code, Codex, Gemini,
 
 ## 3. Status
 
-`extension/` **제품화 착수**(M3.1 Gate 안정화 → M4 Workspace Ingest → M5–M7 VSIX dogfood Done). 계약·일정: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md). 내부: [`extension/DESIGN.md`](extension/DESIGN.md). 로컬 설치: [`deploy/README.md`](deploy/README.md).
+`extension/` **M4 Workspace Ingest (current)** → M5–M7 VSIX dogfood Done. M0–M3.1 Done. 계약·일정: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md). 내부: [`extension/DESIGN.md`](extension/DESIGN.md). 로컬 설치: [`deploy/README.md`](deploy/README.md).
