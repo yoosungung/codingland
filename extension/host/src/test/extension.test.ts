@@ -9,6 +9,14 @@ suite("Codingland Extension Host smoke", () => {
     assert.strictEqual(ext!.isActive, true);
   });
 
+  test("codingland.scanWorkspace command is registered", async () => {
+    const commands = await vscode.commands.getCommands(true);
+    assert.ok(
+      commands.includes("codingland.scanWorkspace"),
+      "codingland.scanWorkspace should be registered"
+    );
+  });
+
   test("codingland.triggerGate command runs", async () => {
     const commands = await vscode.commands.getCommands(true);
     assert.ok(

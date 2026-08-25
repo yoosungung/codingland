@@ -4,13 +4,16 @@ import { CanvasEditorProvider } from "./canvasEditorProvider";
 import { getPanel, showPanel } from "./panel";
 import { revealBeside, type RevealBesidePayload } from "./revealBeside";
 import { GateHost, type TriggerGateArgs } from "./gateHost";
+import { WorkspaceIngestHost } from "./workspaceIngest";
 
 export function activate(context: vscode.ExtensionContext): void {
   const panel = getPanel();
-  panel.appendLine("[codingland] host activate (M3 Mirror Gate)");
+  panel.appendLine("[codingland] host activate (M4 Workspace Ingest)");
 
   const sidebar = new SidebarProvider(context.extensionUri);
   const gateHost = new GateHost(sidebar);
+  const ingestHost = new WorkspaceIngestHost();
+  ingestHost.register(context);
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
