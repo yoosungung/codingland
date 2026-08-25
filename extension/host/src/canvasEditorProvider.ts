@@ -4,8 +4,10 @@ import {
   PAYMENT_MIDDLEWARE_FILE,
   PAYMENT_MIDDLEWARE_SOURCE,
   IsolatedRunner,
+  applyGraphDelta,
   applySemanticZoom,
   extractGraphFromSource,
+  type GraphDelta,
   type GraphNode,
   type GraphSnapshot,
   type RuntimeSnapshot,
@@ -79,6 +81,42 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
         upsertEdges: view.edges,
         removeNodeIds: [],
         removeEdgeIds: [],
+        zoomLevel: view.zoomLevel,
+      },
+    });
+  }
+
+  /** Replace Canvas graph from Workspace Ingest full scan (M4). */
+  public static async setWorkspaceGraph(snapshot: GraphSnapshot): Promise<void> {
+    CanvasEditorProvider.fullSnapshot = {
+      ...snapshot,
+      zoomLevel: snapshot.zoomLevel ?? "boundary",
+    };
+    await CanvasEditorProvider.pushDelta();
+  }
+
+  /** Apply incremental ingest delta to Canvas (M4 onDidSave / watcher). */
+  public static async applyWorkspaceDelta(delta: GraphDelta): Promise<void> {
+    if (!CanvasEditorProvider.fullSnapshot) {
+      CanvasEditorProvider.fullSnapshot = {
+        nodes: [],
+        edges: [],
+        zoomLevel: delta.zoomLevel ?? "boundary",
+      };
+    }
+    const merged = applyGraphDelta(CanvasEditorProvider.fullSnapshot, delta);
+    CanvasEditorProvider.fullSnapshot = merged;
+    if (!CanvasEditorProvider.panel) {
+      return;
+    }
+    const view = applySemanticZoom(merged, merged.zoomLevel);
+    await CanvasEditorProvider.panel.webview.postMessage({
+      type: ProtocolEvents.GRAPH_DELTA,
+      payload: {
+        upsertNodes: delta.upsertNodes ?? [],
+        upsertEdges: delta.upsertEdges ?? [],
+        removeNodeIds: delta.removeNodeIds ?? [],
+        removeEdgeIds: delta.removeEdgeIds ?? [],
         zoomLevel: view.zoomLevel,
       },
     });

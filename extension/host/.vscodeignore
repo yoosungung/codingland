@@ -1,0 +1,14 @@
+../**
+src/**
+**/*.ts
+tsconfig.json
+.vscode-test.mjs
+.vscode-test/**
+**/*.test.js
+**/*.test.js.map
+**/*.map
+node_modules/@types/**
+node_modules/@vscode/**
+node_modules/typescript/**
+node_modules/mocha/**
+node_modules/@types/**

@@ -28,6 +28,31 @@ export {
   type ExtractInput,
 } from "./ast/extract";
 export {
+  extractAndMergeSources,
+  type ExtractAndMergeOptions,
+  type ExtractAndMergeResult,
+  type ExtractAndMergeStats,
+  type ExtractSourceInput,
+} from "./ast/extractMulti";
+export {
+  DEFAULT_EXCLUDE_GLOBS,
+  isExcludedPath,
+  matchGlob,
+  type ExcludePathOptions,
+} from "./graph/excludeGlob";
+export {
+  createGraphStore,
+  findNodeByFingerprint,
+  getUriIndexEntry,
+  mergeFileIntoStore,
+  mergeFilesIntoStore,
+  removeUriFromStore,
+  toGraphStoreSnapshot,
+  type GraphStoreSnapshot,
+  type GraphStoreState,
+  type MergeResult,
+} from "./graph/graphStore";
+export {
   PAYMENT_MIDDLEWARE_FILE,
   PAYMENT_MIDDLEWARE_SOURCE,
 } from "./ast/paymentSample";

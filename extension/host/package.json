@@ -64,6 +64,10 @@
       {
         "command": "codingland.triggerGate",
         "title": "Codingland: Trigger Mirror Gate"
+      },
+      {
+        "command": "codingland.scanWorkspace",
+        "title": "Codingland: Scan Workspace"
       }
     ],
     "configuration": {
@@ -83,7 +87,8 @@
     "test:vscode": "node ../scripts/run-vscode-test.cjs"
   },
   "dependencies": {
-    "@codingland/core": "0.0.1"
+    "@codingland/core": "0.0.1",
+    "ts-morph": "^25.0.1"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

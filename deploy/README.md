@@ -58,9 +58,16 @@ code --install-extension ./codingland-0.0.1.vsix
 
 `vsce`가 README/라이선스 경고를 내면 `--allow-missing-repository` 등 옵션으로 패키징하거나, host에 최소 README를 두면 된다. 배포용이 아니면 경고만 확인하면 충분하다.
 
-### VSIX monorepo 제약 (M4 해소 예정)
+### VSIX monorepo (M4)
 
-현재 `host`가 workspace `@codingland/core`를 쓰면 `vsce package`가 `extension/../…` 상대 경로를 끌어 **실패**할 수 있다. **M4**에서 `.vscodeignore` + core 번들(또는 필요 산출만 포함)로 고친다. 그 전까지 로컬 검증은 **A. Extension Development Host**를 쓴다. 1차 제품 Done(M7)은 내부 VSIX dogfood — [ROADMAP](../ROADMAP.md).
+`host`가 workspace `@codingland/core`를 symlink로 쓰면 `vsce package`가 `extension/../…` 경로를 끌어 실패한다. **M4**에서 `extension/scripts/prepare-vsix.cjs`가 core tarball을 `host/node_modules`에 설치하고 `host/.vscodeignore`로 monorepo 상위를 제외한다.
+
+```bash
+cd extension
+npm run package:vsix
+```
+
+생성: `extension/host/codingland-0.0.1.vsix`. Development Host 없이 VSIX만 검증할 때 위 명령을 쓴다.
 
 ## M0 스모크 체크
 
