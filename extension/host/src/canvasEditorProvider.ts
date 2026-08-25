@@ -16,7 +16,10 @@ import {
 import { revealBeside } from "./revealBeside";
 import { getPanel } from "./panel";
 
-/** Custom Editor (Canvas) — graph + zoom + Time Bar / Hot Reboot (M2). */
+/** Cap DOM nodes posted to Canvas webview (avoid EH freeze on huge graphs). */
+const MAX_CANVAS_NODES = 500;
+
+/** Custom Editor + command WebviewPanel Canvas (graph · zoom · Time Bar / Hot Reboot). */
 export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
   public static readonly viewType = "codingland.canvas";
 
@@ -31,6 +34,36 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
       new CanvasEditorProvider(context),
       { webviewOptions: { retainContextWhenHidden: true } }
     );
+  }
+
+  /**
+   * Open Canvas via WebviewPanel (not CustomTextEditor).
+   * Avoids stuck editor progress when custom-editor resolve is delayed/orphaned.
+   */
+  public static async openCanvas(
+    context: vscode.ExtensionContext
+  ): Promise<void> {
+    if (CanvasEditorProvider.panel) {
+      CanvasEditorProvider.panel.reveal(vscode.ViewColumn.Beside, false);
+      await CanvasEditorProvider.pushTimeline();
+      if (CanvasEditorProvider.fullSnapshot) {
+        await CanvasEditorProvider.pushDelta();
+      }
+      return;
+    }
+
+    const panel = vscode.window.createWebviewPanel(
+      CanvasEditorProvider.viewType,
+      "Codingland Canvas",
+      vscode.ViewColumn.Beside,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+        localResourceRoots: [context.extensionUri],
+      }
+    );
+    const provider = new CanvasEditorProvider(context);
+    await provider.bindPanel(panel);
   }
 
   /** Load payment-middleware sample into the open Canvas. */
@@ -59,8 +92,8 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
       fileName: PAYMENT_MIDDLEWARE_FILE,
     });
     CanvasEditorProvider.fullSnapshot = snap;
+    await CanvasEditorProvider.openCanvas(context);
     await CanvasEditorProvider.pushDelta(snap.zoomLevel);
-    void context;
     void vscode.window.showInformationMessage(
       "Codingland: payment middleware sample loaded"
     );
@@ -74,14 +107,16 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
     const level = zoomLevel ?? full.zoomLevel;
     const view = applySemanticZoom(full, level);
     CanvasEditorProvider.fullSnapshot = { ...full, zoomLevel: level };
+    const nodes = view.nodes.slice(0, MAX_CANVAS_NODES);
     await CanvasEditorProvider.panel.webview.postMessage({
       type: ProtocolEvents.GRAPH_DELTA,
       payload: {
-        upsertNodes: view.nodes,
+        upsertNodes: nodes,
         upsertEdges: view.edges,
         removeNodeIds: [],
         removeEdgeIds: [],
         zoomLevel: view.zoomLevel,
+        truncated: view.nodes.length > MAX_CANVAS_NODES,
       },
     });
   }
@@ -113,7 +148,7 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
     await CanvasEditorProvider.panel.webview.postMessage({
       type: ProtocolEvents.GRAPH_DELTA,
       payload: {
-        upsertNodes: delta.upsertNodes ?? [],
+        upsertNodes: (delta.upsertNodes ?? []).slice(0, MAX_CANVAS_NODES),
         upsertEdges: delta.upsertEdges ?? [],
         removeNodeIds: delta.removeNodeIds ?? [],
         removeEdgeIds: delta.removeEdgeIds ?? [],
@@ -129,11 +164,27 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
     webviewPanel: vscode.WebviewPanel,
     _token: vscode.CancellationToken
   ): Promise<void> {
+    try {
+      await this.bindPanel(webviewPanel);
+    } catch (err) {
+      getPanel().appendLine(
+        `[codingland] canvas resolve failed: ${String(err)}`
+      );
+      webviewPanel.webview.html = `<!DOCTYPE html><html><body style="font-family:var(--vscode-font-family);padding:16px">
+        <p>Codingland Canvas failed to load.</p>
+        <pre>${String(err).replace(/[<>&]/g, "")}</pre>
+      </body></html>`;
+    }
+    void document;
+  }
+
+  private async bindPanel(webviewPanel: vscode.WebviewPanel): Promise<void> {
     CanvasEditorProvider.panel = webviewPanel;
     webviewPanel.webview.options = {
       enableScripts: true,
       localResourceRoots: [this.context.extensionUri],
     };
+    // Set HTML first so the editor never stays on an endless progress bar.
     webviewPanel.webview.html = this.getHtml();
 
     webviewPanel.onDidDispose(() => {
@@ -180,12 +231,9 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
 
     CanvasEditorProvider.ensureRunner();
     await CanvasEditorProvider.pushTimeline();
-
     if (CanvasEditorProvider.fullSnapshot) {
       await CanvasEditorProvider.pushDelta();
     }
-
-    void document;
   }
 
   private static ensureRunner(): IsolatedRunner {
@@ -232,10 +280,30 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
     #time-bar input[type=range] { flex: 1; }
     #zoom { display: flex; gap: 6px; padding: 6px 12px; border-bottom: 1px solid var(--vscode-panel-border); font-size: 12px; }
     #canvas { flex: 1; position: relative; overflow: auto; }
-    .node { position: absolute; min-width: 100px; padding: 8px 10px; border: 1px solid var(--vscode-panel-border); background: var(--vscode-editorWidget-background); cursor: pointer; font-size: 12px; }
+    .node {
+      position: absolute;
+      min-width: 100px;
+      padding: 8px 10px;
+      border: 1px solid var(--vscode-panel-border);
+      background: var(--vscode-editorWidget-background);
+      color: var(--vscode-foreground);
+      cursor: pointer;
+      font-size: 12px;
+      appearance: none;
+      -webkit-appearance: none;
+    }
     .node:hover { outline: 1px solid var(--vscode-focusBorder); }
-    .kind { opacity: 0.7; font-size: 10px; }
-    button { cursor: pointer; }
+    .kind { opacity: 0.7; font-size: 10px; color: var(--vscode-descriptionForeground, var(--vscode-foreground)); }
+    button {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      color: var(--vscode-foreground);
+      background: var(--vscode-button-secondaryBackground, var(--vscode-editorWidget-background));
+      border: 1px solid var(--vscode-button-border, var(--vscode-panel-border));
+      padding: 4px 8px;
+    }
+    button:hover { background: var(--vscode-button-secondaryHoverBackground, var(--vscode-list-hoverBackground)); }
   </style>
 </head>
 <body>
@@ -295,13 +363,20 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
         el.className = 'node';
         el.style.left = ((n.anchor && n.anchor.x) || 0) + 'px';
         el.style.top = ((n.anchor && n.anchor.y) || 0) + 'px';
-        el.innerHTML = '<div class="kind">' + n.kind + '</div><div>' + n.name + '</div>';
+        const kind = document.createElement('div');
+        kind.className = 'kind';
+        kind.textContent = n.kind || '';
+        const name = document.createElement('div');
+        name.textContent = n.name || '';
+        el.appendChild(kind);
+        el.appendChild(name);
         el.addEventListener('click', () => {
           vscode.postMessage({ type: '${select}', payload: n });
         });
         canvas.appendChild(el);
       });
-      document.getElementById('zoom-label').textContent = payload.zoomLevel || '';
+      document.getElementById('zoom-label').textContent =
+        (payload.zoomLevel || '') + (payload.truncated ? ' (truncated)' : '');
     });
   </script>
 </body>

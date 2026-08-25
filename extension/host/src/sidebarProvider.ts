@@ -62,11 +62,20 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
   <style>
-    body { font-family: var(--vscode-font-family); padding: 12px; color: var(--vscode-foreground); }
-    h1 { font-size: 14px; margin: 0 0 8px; }
-    h2 { font-size: 13px; margin: 12px 0 6px; }
-    p { opacity: 0.9; font-size: 12px; margin: 4px 0; }
-    button { margin: 4px 4px 0 0; }
+    body { font-family: var(--vscode-font-family); padding: 12px; color: var(--vscode-foreground); background: var(--vscode-sideBar-background, transparent); }
+    h1 { font-size: 14px; margin: 0 0 8px; color: var(--vscode-foreground); }
+    h2 { font-size: 13px; margin: 12px 0 6px; color: var(--vscode-foreground); }
+    p { opacity: 0.9; font-size: 12px; margin: 4px 0; color: var(--vscode-foreground); }
+    button {
+      margin: 4px 4px 0 0;
+      color: var(--vscode-button-foreground, var(--vscode-foreground));
+      background: var(--vscode-button-background, var(--vscode-button-secondaryBackground));
+      border: 1px solid var(--vscode-button-border, transparent);
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+    button:hover { background: var(--vscode-button-hoverBackground, var(--vscode-button-secondaryHoverBackground)); }
+    pre { color: var(--vscode-foreground); }
   </style>
 </head>
 <body>

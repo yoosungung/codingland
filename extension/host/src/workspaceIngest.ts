@@ -45,9 +45,9 @@ export class WorkspaceIngestHost {
       this.createWatcher()
     );
 
-    if (vscode.workspace.workspaceFolders?.length) {
-      void this.scanWorkspace({ showProgress: false });
-    }
+    // No auto-scan on activate — large workspaces (or mis-excludes) freeze the
+    // Extension Host and leave Custom Editors on an endless progress bar.
+    // Use Codingland: Scan Workspace explicitly.
   }
 
   async scanWorkspace(options: ScanWorkspaceOptions = {}): Promise<GraphSnapshot> {

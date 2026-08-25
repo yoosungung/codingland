@@ -1,2 +1,4 @@
 .vsix-stage/
+.vscode-test/
+host/.vscode-test/
 host/codingland-*.vsix

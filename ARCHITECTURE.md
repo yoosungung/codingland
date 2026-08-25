@@ -22,7 +22,7 @@ Codingland 컴포넌트 *간* 불변 계약과 인터페이스 형태. 마일스
 12. **코드 reveal.** `ViewColumn.Beside` (Custom Editor를 코드 탭으로 교체하지 않음).
 13. **순수 코어 분리.** AST·Sanitizer·Delta·마찰 점수·fingerprint·정적 KG는 `vscode.*` 비의존 패키지; Host는 어댑터만.
 14. **지식 그래프 개념(Graphify에서 차용).** Codingland가 소유하는 정적 관계는 **호출·의존·포함** 그래프이며, 엣지에 **`extracted`(AST에서 확정) vs `inferred`(추론)** 구분을 둔다. Debt/`verified`에는 **extracted만** 집계한다. `path`/`query`식 부분그래프 탐색은 Walkthrough·ChangeScore **개념**으로 core에 구현한다. **외부 Graphify CLI·SaaS·Neo4j·원격 MCP·`graphify-out/` 파일 감시·`graph.html` 임베드는 통합 대상이 아니다.** 이와 별개로, Codingland **자체** Workspace Ingest(워크스페이스 스캔·증분 갱신)는 Host가 VS Code `FileSystemWatcher` / `onDidSave` 등으로 구동하고 core GraphStore에 병합하는 것이 **허용·필수(제품화)** 이다 — Graphify 산출물 감시가 아니다. 필요 시 tree-sitter 등 **라이브러리 패키지**를 `extension/core` 의존성으로만 넣는다 (프로세스 내).
-15. **Workspace Ingest.** 임의 워크스페이스에서 지원 언어 소스를 in-process로 추출해 GraphStore에 넣는다. 전체 스냅샷은 세션/스캔 시작 시에만; 이후는 Delta. exclude 글롭으로 `node_modules` 등 제외. 언어 순서·도구는 [ROADMAP](ROADMAP.md)(TS/JS→Python→Rust).
+15. **Workspace Ingest.** 임의 워크스페이스에서 지원 언어 소스를 in-process로 추출해 GraphStore에 넣는다. 전체 스냅샷은 세션/스캔 시작 시에만; 이후는 Delta. exclude 글롭으로 `node_modules`·`dist`·`out`·`.git`·`.vscode-test`·`.vsix-stage` 등 제외(호스트가 무거운 바이너리/빌드 산출물을 파싱해 Extension Host를 막지 않도록). 언어 순서·도구는 [ROADMAP](ROADMAP.md)(TS/JS→Python→Rust).
 
 ## 2. 컴포넌트 경계
 
