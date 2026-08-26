@@ -7,3 +7,11 @@ e2e:
   # Not a web base_url — Extension Host command gate
   command: "npm --prefix extension run test:vscode"
   scenarios_path: e2e/scenarios
+
+# Weekly AA (aa-clean-weekly). Mechanical TS gate — not security-review.
+# Findings → New tickets on codingland Leantime project. No load/opik (extension Non-goal).
+clean_code:
+  command: "npm --prefix extension run ci"
+  focus_paths: ["extension/core/", "extension/host/"]
+  exclude_paths: ["extension/**/node_modules/", "extension/**/out/", "extension/**/dist/"]
+  max_findings: 5
