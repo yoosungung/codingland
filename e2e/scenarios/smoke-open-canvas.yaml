@@ -1,0 +1,21 @@
+id: smoke-open-canvas
+title: Open Canvas WebviewPanel
+mode: hybrid
+milestone: M0
+learn: Canvas는 Custom Editor 대신 WebviewPanel로 열린다(진행 바 멈춤 방지).
+
+automation:
+  suite: Codingland dogfood (Extension Host)
+  test: "[scenario:smoke-open-canvas] openCanvas runs without error"
+
+steps:
+  - step: 1
+    ui: Command Palette
+    action: "Codingland: Open Canvas"
+    expect: Beside에 "Codingland Canvas" 탭; Time Bar·Zoom toolbar 표시
+  - step: 2
+    ui: Canvas
+    action: Zoom 버튼 boundary / function / detail 클릭
+    expect: zoom-label 텍스트 변경
+
+evidence: "qa: e2e pass scenario=smoke-open-canvas evidence=screenshot or test log"

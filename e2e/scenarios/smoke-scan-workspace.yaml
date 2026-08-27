@@ -1,0 +1,23 @@
+id: smoke-scan-workspace
+title: Scan Workspace command registered and runnable
+mode: hybrid
+milestone: M4
+learn: Workspace Ingest의 진입점 — TS/JS 파일을 GraphStore로 스캔한다.
+
+automation:
+  suite: Codingland Extension Host smoke
+  test: "[scenario:smoke-scan-workspace] codingland.scanWorkspace command is registered"
+  suite_dogfood: Codingland dogfood (Extension Host)
+  test_dogfood: "[scenario:smoke-scan-workspace] scanWorkspace completes with nodes"
+
+steps:
+  - step: 1
+    ui: Command Palette
+    action: "Codingland: Scan Workspace"
+    expect: Notification progress "Codingland: scanning workspace"; Panel에 ingest 로그
+  - step: 2
+    ui: Panel (Codingland)
+    action: "Codingland: Show Panel Log"
+    expect: "ingest complete - N files, M nodes" 로그
+
+evidence: "qa: e2e pass scenario=smoke-scan-workspace evidence=panel log or test log"

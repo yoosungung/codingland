@@ -1,0 +1,36 @@
+id: dogfood-m4-incremental
+title: M4 증분 ingest — 저장·생성·삭제
+mode: hybrid
+milestone: M4
+learn: FileSystemWatcher가 파일 변경을 GraphStore·Canvas Delta로 반영한다.
+
+automation:
+  suite: Codingland dogfood (Extension Host)
+  test: "[scenario:dogfood-m4-incremental] save fixture then rescan still yields graph"
+  note: 자동 테스트는 rescan으로 회귀만 검증; UI Delta는 수동 step 2–4
+
+prerequisites:
+  - dogfood-m4-workflow에서 Scan + Open Canvas 완료
+
+steps:
+  - step: 1
+    ui: Editor
+    action: 워크스페이스 내 TS 파일에 함수/클래스 추가 후 저장
+    expect: Panel에 "ingest <path> (+N nodes)"; Canvas 노드 증가/갱신
+
+  - step: 2
+    ui: Explorer
+    action: 새 .ts 파일 생성 (간단 export) 후 저장
+    expect: ingest create 로그; Canvas에 새 노드
+
+  - step: 3
+    ui: Explorer
+    action: 스캔 대상 .ts 파일 삭제
+    expect: Panel "ingest removed <path>"; Canvas에서 해당 노드 제거
+
+  - step: 4
+    ui: Canvas
+    action: 변경 후 노드 클릭
+    expect: Beside reveal 정상
+
+evidence: "qa: e2e pass scenario=dogfood-m4-incremental evidence=panel log before/after save"

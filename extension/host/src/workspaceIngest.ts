@@ -40,7 +40,7 @@ export class WorkspaceIngestHost {
   register(context: vscode.ExtensionContext): void {
     context.subscriptions.push(
       vscode.commands.registerCommand("codingland.scanWorkspace", async () => {
-        await this.scanWorkspace({ showProgress: true });
+        return await this.scanWorkspace({ showProgress: true });
       }),
       this.createWatcher()
     );

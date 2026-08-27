@@ -1,0 +1,15 @@
+id: smoke-activate
+title: Extension activates in Extension Development Host
+mode: automated
+milestone: M0
+learn: Codingland 확장이 Cursor/VS Code에 로드·활성화되는지 확인한다.
+
+automation:
+  suite: Codingland Extension Host smoke
+  test: "[scenario:smoke-activate] extension activates"
+
+steps:
+  - action: npm --prefix extension run test:vscode (또는 F5 Extension Development Host)
+    expect: yoosungung.codingland 활성화, 테스트 통과
+
+evidence: "qa: e2e pass scenario=smoke-activate evidence=extension.test log"

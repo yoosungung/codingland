@@ -1,0 +1,29 @@
+id: dogfood-install
+title: VSIX 설치 (일상 dogfood 준비)
+mode: manual
+milestone: M4
+learn: Development Host 없이 본인 Cursor 프로필에 확장을 설치한다.
+
+prerequisites:
+  - Node.js, extension/ 에서 npm install 완료
+
+steps:
+  - step: 1
+    action: "cd extension && npm run package:vsix"
+    expect: extension/host/codingland-0.0.1.vsix 생성
+
+  - step: 2
+    action: "cursor --install-extension ./host/codingland-0.0.1.vsix --force"
+    expect: "successfully installed"
+
+  - step: 3
+    ui: Cursor
+    action: "Developer: Reload Window"
+    expect: Extensions에 yoosungung.codingland 표시
+
+  - step: 4
+    ui: Activity Bar
+    action: Codingland 아이콘 클릭
+    expect: Sidebar "Agent & Debt" webview
+
+evidence: "qa: e2e pass scenario=dogfood-install evidence=cursor --list-extensions | grep codingland"
