@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { SidebarProvider } from "./sidebarProvider";
 import { CanvasEditorProvider } from "./canvasEditorProvider";
+import { CanvasSession } from "./canvasSession";
 import { getPanel, showPanel } from "./panel";
 import { revealBeside, type RevealBesidePayload } from "./revealBeside";
 import { GateHost, type TriggerGateArgs } from "./gateHost";
@@ -12,6 +13,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const sidebar = new SidebarProvider(context.extensionUri);
   const gateHost = new GateHost(sidebar);
+  const canvasSession = new CanvasSession();
 
   // Register Canvas before ingest so Open Canvas is not stuck behind a long scan.
   context.subscriptions.push(
@@ -19,7 +21,7 @@ export function activate(context: vscode.ExtensionContext): void {
       SidebarProvider.viewType,
       sidebar
     ),
-    CanvasEditorProvider.register(context),
+    CanvasEditorProvider.register(context, canvasSession),
     vscode.commands.registerCommand("codingland.showPanel", () => {
       showPanel();
     }),

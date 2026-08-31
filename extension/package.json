@@ -10,6 +10,7 @@
     "compile": "npm run compile -w @codingland/core && npm run compile -w codingland",
     "ci": "npm install && npm run compile && npm test",
     "test:vscode": "npm run compile && node ./scripts/run-vscode-test.cjs",
+    "ci": "npm test && npm run test:vscode",
     "package:vsix": "npm run compile && node ./scripts/package-vsix.cjs"
   }
 }
