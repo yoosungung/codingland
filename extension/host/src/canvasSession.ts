@@ -16,12 +16,23 @@ import {
 import { revealBeside } from "./revealBeside";
 import { getPanel } from "./panel";
 
+/** Cap DOM nodes posted to Canvas webview (avoid EH freeze on huge graphs). */
+export const MAX_CANVAS_NODES = 500;
+
 /** Canvas graph + runner + timeline state (M4 workspace ingest target). */
 export class CanvasSession {
   private panel: vscode.WebviewPanel | undefined;
   private fullSnapshot: GraphSnapshot | undefined;
   private runner: IsolatedRunner | undefined;
   private timeline: RuntimeSnapshot[] = [];
+
+  hasPanel(): boolean {
+    return this.panel !== undefined;
+  }
+
+  revealPanel(): void {
+    this.panel?.reveal(vscode.ViewColumn.Beside, false);
+  }
 
   attachPanel(panel: vscode.WebviewPanel): void {
     this.panel = panel;
@@ -33,8 +44,8 @@ export class CanvasSession {
     }
   }
 
-  /** Load payment-middleware sample into the open Canvas. */
-  async loadPaymentSample(context: vscode.ExtensionContext): Promise<void> {
+  /** Load payment-middleware sample graph (caller opens Canvas if needed). */
+  async preparePaymentSample(context: vscode.ExtensionContext): Promise<void> {
     const folder = vscode.workspace.workspaceFolders?.[0];
     let uri: string;
     if (folder) {
@@ -57,7 +68,6 @@ export class CanvasSession {
       fileName: PAYMENT_MIDDLEWARE_FILE,
     });
     this.fullSnapshot = snap;
-    await this.pushDelta(snap.zoomLevel);
     void context;
     void vscode.window.showInformationMessage(
       "Codingland: payment middleware sample loaded"
@@ -72,14 +82,16 @@ export class CanvasSession {
     const level = zoomLevel ?? full.zoomLevel;
     const view = applySemanticZoom(full, level);
     this.fullSnapshot = { ...full, zoomLevel: level };
+    const nodes = view.nodes.slice(0, MAX_CANVAS_NODES);
     await this.panel.webview.postMessage({
       type: ProtocolEvents.GRAPH_DELTA,
       payload: {
-        upsertNodes: view.nodes,
+        upsertNodes: nodes,
         upsertEdges: view.edges,
         removeNodeIds: [],
         removeEdgeIds: [],
         zoomLevel: view.zoomLevel,
+        truncated: view.nodes.length > MAX_CANVAS_NODES,
       },
     });
   }
@@ -111,7 +123,7 @@ export class CanvasSession {
     await this.panel.webview.postMessage({
       type: ProtocolEvents.GRAPH_DELTA,
       payload: {
-        upsertNodes: delta.upsertNodes ?? [],
+        upsertNodes: (delta.upsertNodes ?? []).slice(0, MAX_CANVAS_NODES),
         upsertEdges: delta.upsertEdges ?? [],
         removeNodeIds: delta.removeNodeIds ?? [],
         removeEdgeIds: delta.removeEdgeIds ?? [],

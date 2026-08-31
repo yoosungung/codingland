@@ -1,0 +1,23 @@
+id: dogfood-gate-sidebar
+title: Mirror Gate + Sidebar (M3 회귀)
+mode: manual
+milestone: M3
+learn: Gate는 채점이 아니라 Spec 합의 — Sidebar에 tier·phase·Consensus UI.
+
+steps:
+  - step: 1
+    ui: Activity Bar → Codingland
+    action: Sidebar "Agent & Debt" 열기
+    expect: Codingland / Agent / Debt / Gate 영역
+
+  - step: 2
+    ui: Command Palette
+    action: "Codingland: Trigger Mirror Gate"
+    expect: Information tier=… passed=…; Sidebar Gate 블록 갱신
+
+  - step: 3
+    ui: Sidebar Gate
+    action: Confirm Consensus / Reject 버튼 (UI 스모크)
+    expect: Information 메시지 (full flow는 M5 SCM 훅)
+
+evidence: "qa: e2e pass scenario=dogfood-gate-sidebar evidence=sidebar screenshot"

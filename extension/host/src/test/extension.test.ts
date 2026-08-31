@@ -1,15 +1,21 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
+import { activateCodingland } from "./setup";
 
 suite("Codingland Extension Host smoke", () => {
-  test("extension activates", async () => {
+  suiteSetup(async function () {
+    this.timeout(30_000);
+    await activateCodingland();
+  });
+
+  test("[scenario:smoke-activate] extension activates", async () => {
     const ext = vscode.extensions.getExtension("yoosungung.codingland");
     assert.ok(ext, "yoosungung.codingland should be present");
     await ext!.activate();
     assert.strictEqual(ext!.isActive, true);
   });
 
-  test("codingland.scanWorkspace command is registered", async () => {
+  test("[scenario:smoke-scan-workspace] codingland.scanWorkspace command is registered", async () => {
     const commands = await vscode.commands.getCommands(true);
     assert.ok(
       commands.includes("codingland.scanWorkspace"),
@@ -17,7 +23,7 @@ suite("Codingland Extension Host smoke", () => {
     );
   });
 
-  test("codingland.triggerGate command runs", async () => {
+  test("[scenario:smoke-triggerGate] codingland.triggerGate command runs", async () => {
     const commands = await vscode.commands.getCommands(true);
     assert.ok(
       commands.includes("codingland.triggerGate"),

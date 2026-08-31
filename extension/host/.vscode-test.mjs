@@ -1,10 +1,14 @@
 import { defineConfig } from "@vscode/test-cli";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const hostDir = path.dirname(fileURLToPath(import.meta.url));
 const fromPath = process.env.VSCODE_EXECUTABLE_PATH;
 
 /** CI/headless-safe Electron flags for Extension Development Host. */
 export default defineConfig({
   files: "out/test/**/*.test.js",
+  workspaceFolder: hostDir,
   mocha: {
     ui: "tdd",
     timeout: 60_000,

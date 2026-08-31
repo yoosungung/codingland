@@ -1,0 +1,17 @@
+id: smoke-show-panel
+title: Panel log output channel
+mode: hybrid
+milestone: M0
+learn: ingest·Gate·timeline 이벤트는 Panel(Output)에 기록된다.
+
+automation:
+  suite: Codingland dogfood (Extension Host)
+  test: "[scenario:smoke-show-panel] showPanel opens Output channel"
+
+steps:
+  - step: 1
+    ui: Command Palette
+    action: "Codingland: Show Panel Log"
+    expect: Output 채널 "Codingland" 표시, "[codingland] host activate" 등 로그
+
+evidence: "qa: e2e pass scenario=smoke-show-panel evidence=panel screenshot"

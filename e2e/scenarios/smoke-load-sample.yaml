@@ -1,0 +1,21 @@
+id: smoke-load-sample
+title: Payment middleware sample graph
+mode: hybrid
+milestone: M1
+learn: 샘플 결제 미들웨어로 그래프·Replay 회귀 경로를 빠르게 확인한다.
+
+automation:
+  suite: Codingland dogfood (Extension Host)
+  test: "[scenario:smoke-load-sample] loadPaymentSample loads graph"
+
+steps:
+  - step: 1
+    ui: Command Palette
+    action: "Codingland: Load Payment Middleware Sample"
+    expect: Information "payment middleware sample loaded"; Canvas에 노드 표시
+  - step: 2
+    ui: Canvas
+    action: 노드 클릭
+    expect: Beside에 소스 reveal (uri/range)
+
+evidence: "qa: e2e pass scenario=smoke-load-sample evidence=screenshot"

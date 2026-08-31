@@ -2,8 +2,9 @@ import * as vscode from "vscode";
 import type { GraphDelta, GraphSnapshot } from "@codingland/core";
 import { buildCanvasHtml } from "./canvasHtml";
 import { CanvasSession } from "./canvasSession";
+import { getPanel } from "./panel";
 
-/** Custom Editor (Canvas) — thin VS Code adapter over CanvasSession. */
+/** Custom Editor + command WebviewPanel Canvas — thin VS Code adapter over CanvasSession. */
 export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
   public static readonly viewType = "codingland.canvas";
 
@@ -21,11 +22,42 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
     );
   }
 
+  /**
+   * Open Canvas via WebviewPanel (not CustomTextEditor).
+   * Avoids stuck editor progress when custom-editor resolve is delayed/orphaned.
+   */
+  public static async openCanvas(
+    context: vscode.ExtensionContext
+  ): Promise<void> {
+    const session = CanvasEditorProvider.requireSession();
+    if (session.hasPanel()) {
+      session.revealPanel();
+      await session.onPanelReady();
+      return;
+    }
+
+    const panel = vscode.window.createWebviewPanel(
+      CanvasEditorProvider.viewType,
+      "Codingland Canvas",
+      vscode.ViewColumn.Beside,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+        localResourceRoots: [context.extensionUri],
+      }
+    );
+    const provider = new CanvasEditorProvider(context, session);
+    await provider.bindPanel(panel);
+  }
+
   /** Load payment-middleware sample into the open Canvas. */
   public static async loadPaymentSample(
     context: vscode.ExtensionContext
   ): Promise<void> {
-    await CanvasEditorProvider.requireSession().loadPaymentSample(context);
+    const session = CanvasEditorProvider.requireSession();
+    await session.preparePaymentSample(context);
+    await CanvasEditorProvider.openCanvas(context);
+    await session.pushDelta();
   }
 
   public static async pushDelta(
@@ -61,11 +93,27 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
     webviewPanel: vscode.WebviewPanel,
     _token: vscode.CancellationToken
   ): Promise<void> {
+    try {
+      await this.bindPanel(webviewPanel);
+    } catch (err) {
+      getPanel().appendLine(
+        `[codingland] canvas resolve failed: ${String(err)}`
+      );
+      webviewPanel.webview.html = `<!DOCTYPE html><html><body style="font-family:var(--vscode-font-family);padding:16px">
+        <p>Codingland Canvas failed to load.</p>
+        <pre>${String(err).replace(/[<>&]/g, "")}</pre>
+      </body></html>`;
+    }
+    void document;
+  }
+
+  private async bindPanel(webviewPanel: vscode.WebviewPanel): Promise<void> {
     this.session.attachPanel(webviewPanel);
     webviewPanel.webview.options = {
       enableScripts: true,
       localResourceRoots: [this.context.extensionUri],
     };
+    // Set HTML first so the editor never stays on an endless progress bar.
     webviewPanel.webview.html = buildCanvasHtml();
 
     webviewPanel.onDidDispose(() => {
@@ -77,7 +125,5 @@ export class CanvasEditorProvider implements vscode.CustomTextEditorProvider {
     });
 
     await this.session.onPanelReady();
-
-    void document;
   }
 }

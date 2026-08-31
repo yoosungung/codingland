@@ -18,10 +18,30 @@ export function buildCanvasHtml(): string {
     #time-bar input[type=range] { flex: 1; }
     #zoom { display: flex; gap: 6px; padding: 6px 12px; border-bottom: 1px solid var(--vscode-panel-border); font-size: 12px; }
     #canvas { flex: 1; position: relative; overflow: auto; }
-    .node { position: absolute; min-width: 100px; padding: 8px 10px; border: 1px solid var(--vscode-panel-border); background: var(--vscode-editorWidget-background); cursor: pointer; font-size: 12px; }
+    .node {
+      position: absolute;
+      min-width: 100px;
+      padding: 8px 10px;
+      border: 1px solid var(--vscode-panel-border);
+      background: var(--vscode-editorWidget-background);
+      color: var(--vscode-foreground);
+      cursor: pointer;
+      font-size: 12px;
+      appearance: none;
+      -webkit-appearance: none;
+    }
     .node:hover { outline: 1px solid var(--vscode-focusBorder); }
-    .kind { opacity: 0.7; font-size: 10px; }
-    button { cursor: pointer; }
+    .kind { opacity: 0.7; font-size: 10px; color: var(--vscode-descriptionForeground, var(--vscode-foreground)); }
+    button {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      color: var(--vscode-foreground);
+      background: var(--vscode-button-secondaryBackground, var(--vscode-editorWidget-background));
+      border: 1px solid var(--vscode-button-border, var(--vscode-panel-border));
+      padding: 4px 8px;
+    }
+    button:hover { background: var(--vscode-button-secondaryHoverBackground, var(--vscode-list-hoverBackground)); }
   </style>
 </head>
 <body>
@@ -81,13 +101,20 @@ export function buildCanvasHtml(): string {
         el.className = 'node';
         el.style.left = ((n.anchor && n.anchor.x) || 0) + 'px';
         el.style.top = ((n.anchor && n.anchor.y) || 0) + 'px';
-        el.innerHTML = '<div class="kind">' + n.kind + '</div><div>' + n.name + '</div>';
+        const kind = document.createElement('div');
+        kind.className = 'kind';
+        kind.textContent = n.kind || '';
+        const name = document.createElement('div');
+        name.textContent = n.name || '';
+        el.appendChild(kind);
+        el.appendChild(name);
         el.addEventListener('click', () => {
           vscode.postMessage({ type: '${select}', payload: n });
         });
         canvas.appendChild(el);
       });
-      document.getElementById('zoom-label').textContent = payload.zoomLevel || '';
+      document.getElementById('zoom-label').textContent =
+        (payload.zoomLevel || '') + (payload.truncated ? ' (truncated)' : '');
     });
   </script>
 </body>

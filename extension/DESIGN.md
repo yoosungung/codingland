@@ -18,7 +18,7 @@
 - host: Sidebar Gate 패널; `codingland.triggerGate` 커맨드; Heuristic Mirror 어댑터 배선
 - Jest: changeScore / gateSession / pathQuery / specSync / mirrorAdapter / gateSmoke / sanitize / cloudMirror
 
-## M3.1 범위 (current)
+## M3.1 범위 (완료)
 
 - core: Sanitizer 단위/회귀 테스트 보강 (AST/이름 + depth≤3); `resolveMirrorAdapter` — 기본 **local**(Heuristic), `cloudOptIn`일 때만 Cloud 경로; Cloud 경로 입력은 Sanitizer 필수
 - host: `codingland.mirror.cloudOptIn` (default `false`) + GateHost가 어댑터 선택
@@ -27,7 +27,7 @@
 
 외부 Graphify CLI는 여기 구현하지 않는다.
 
-## M4 범위 (Workspace Ingest · TS/JS)
+## M4 범위 (Workspace Ingest · TS/JS · current)
 
 - core: 다파일 extract → GraphStore 병합(fingerprint·uriIndex); exclude 글롭 헬퍼
 - host: `codingland.scanWorkspace`; 워크스페이스 열기 시 백그라운드 스캔 + Progress; `onDidSave`/FileSystemWatcher 증분; Canvas는 GraphStore 기반(샘플 없이도 표시)
@@ -87,6 +87,7 @@
 npm install          # workspaces: core + host
 npm test             # core Jest
 npm run compile      # core dist/ then host out/
+npm run ci           # install + compile + core Jest (AA clean_code)
 npm run package:vsix # stage + vsce → host/codingland-0.0.1.vsix
 npm run test:vscode  # full compile + Extension Host smoke (@vscode/test-cli)
 # Linux headless Pod/CI: needs xvfb + Electron libs (libgtk-3-0, libnss3, libgbm1, libasound2, …);
@@ -101,6 +102,6 @@ core만:
 npm test -w @codingland/core
 ```
 
-QA 게이트(테넌트): 저장소 루트 [`.factory/quality.yaml`](../.factory/quality.yaml) `e2e.command` → `npm --prefix extension run test:vscode` (브라우저 `base_url` 아님). `test:vscode`는 **core를 먼저** 컴파일한 뒤 host를 빌드한다(클린 sync에서 `@codingland/core` 해석 실패 방지). 시나리오 메모: [`e2e/scenarios/`](../e2e/scenarios/).
+QA 게이트(테넌트): 저장소 루트 [`.factory/quality.yaml`](../.factory/quality.yaml) `e2e.command` → `npm --prefix extension run test:vscode` (브라우저 `base_url` 아님). `test:vscode`는 **core를 먼저** 컴파일한 뒤 host를 빌드한다(클린 sync에서 `@codingland/core` 해석 실패 방지). AA 주간 NF: 같은 파일 `clean_code.command` → `npm --prefix extension run ci` (install+compile+core Jest). 시나리오 메모: [`e2e/scenarios/`](../e2e/scenarios/).
 
 VS Code/Cursor에 로컬 로드·VSIX 설치: [`../deploy/README.md`](../deploy/README.md). Host 커맨드 `codingland.scanWorkspace`는 Extension Development Host에서 실행.

@@ -16,7 +16,7 @@ This file provides guidance to AI coding assistants (Claude Code, Codex, Gemini,
 | `ROADMAP.md` | 수행 계획(마일스톤·확정 결정·미결정) | 루트 |
 | `extension/DESIGN.md` | Extension *내부* 설계 + `## Commands` | `extension/` (코드 착수 시) |
 | `deploy/README.md` | 로컬 로드·VSIX 설치(+ 추후 Marketplace 런북) | `deploy/` |
-| `.factory/quality.yaml` | 테넌트 QA 게이트(`e2e.command` = Extension Host `test:vscode`) | 루트 |
+| `.factory/quality.yaml` | 테넌트 게이트: `e2e.command`(Extension Host `test:vscode`) + `clean_code`(AA 주간, TS compile+Jest) | 루트 |
 
 규칙:
 
@@ -37,4 +37,4 @@ This file provides guidance to AI coding assistants (Claude Code, Codex, Gemini,
 
 ## 3. Status
 
-`extension/` **제품화 착수**(M3.1 Gate 안정화 → M4 Workspace Ingest → M5–M7 VSIX dogfood Done). 계약·일정: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md). 내부: [`extension/DESIGN.md`](extension/DESIGN.md). 로컬 설치: [`deploy/README.md`](deploy/README.md).
+`extension/` **M4 Workspace Ingest (current)** → M5–M7 VSIX dogfood Done. M0–M3.1 Done. 계약·일정: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md). 내부: [`extension/DESIGN.md`](extension/DESIGN.md). 로컬 설치: [`deploy/README.md`](deploy/README.md).

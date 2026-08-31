@@ -1,0 +1,15 @@
+id: smoke-triggerGate
+title: Mirror Gate smoke command
+mode: automated
+milestone: M3
+learn: codingland.triggerGate가 등록되어 GateSmokeResult를 반환한다.
+
+automation:
+  suite: Codingland Extension Host smoke
+  test: "[scenario:smoke-triggerGate] codingland.triggerGate command runs"
+
+steps:
+  - action: Command Palette → Codingland: Trigger Mirror Gate (또는 자동 테스트)
+    expect: tier=none|light|full, passed boolean
+
+evidence: "qa: e2e pass scenario=smoke-triggerGate evidence=extension.test log"

@@ -2,7 +2,10 @@
 export const DEFAULT_EXCLUDE_GLOBS = [
   "**/node_modules/**",
   "**/dist/**",
+  "**/out/**",
   "**/.git/**",
+  "**/.vscode-test/**",
+  "**/.vsix-stage/**",
 ];
 
 export interface ExcludePathOptions {

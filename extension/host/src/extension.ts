@@ -14,9 +14,8 @@ export function activate(context: vscode.ExtensionContext): void {
   const sidebar = new SidebarProvider(context.extensionUri);
   const gateHost = new GateHost(sidebar);
   const canvasSession = new CanvasSession();
-  const ingestHost = new WorkspaceIngestHost();
-  ingestHost.register(context);
 
+  // Register Canvas before ingest so Open Canvas is not stuck behind a long scan.
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       SidebarProvider.viewType,
@@ -33,36 +32,10 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     ),
     vscode.commands.registerCommand("codingland.openCanvas", async () => {
-      const folder = vscode.workspace.workspaceFolders?.[0];
-      if (folder) {
-        const target = vscode.Uri.joinPath(
-          folder.uri,
-          ".codingland-canvas.codingland.json"
-        );
-        await vscode.workspace.fs.writeFile(
-          target,
-          Buffer.from(
-            JSON.stringify(
-              { kind: "codingland.canvas", version: 3, milestone: "M3" },
-              null,
-              2
-            ),
-            "utf8"
-          )
-        );
-        await vscode.commands.executeCommand(
-          "vscode.openWith",
-          target,
-          CanvasEditorProvider.viewType
-        );
-      } else {
-        vscode.window.showInformationMessage(
-          "Codingland: open a workspace folder to use the Canvas custom editor."
-        );
-      }
+      // WebviewPanel path — avoids stuck CustomTextEditor progress bar.
+      await CanvasEditorProvider.openCanvas(context);
     }),
     vscode.commands.registerCommand("codingland.loadPaymentSample", async () => {
-      await vscode.commands.executeCommand("codingland.openCanvas");
       await CanvasEditorProvider.loadPaymentSample(context);
     }),
     vscode.commands.registerCommand(
@@ -77,6 +50,9 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
     panel
   );
+
+  const ingestHost = new WorkspaceIngestHost();
+  ingestHost.register(context);
 }
 
 export function deactivate(): void {

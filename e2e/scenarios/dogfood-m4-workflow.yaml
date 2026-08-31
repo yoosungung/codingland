@@ -1,0 +1,52 @@
+id: dogfood-m4-workflow
+title: M4 dogfood — Scan → Canvas → Beside (성공 기준 #1294)
+mode: manual
+milestone: M4
+learn: |
+  M4 핵심 일상 루프. 샘플 없이 임의 TS/JS 워크스페이스에서 경계 그래프를 본다.
+  자동 스캔은 비활성 — Scan Workspace를 수동 실행한다.
+
+prerequisites:
+  - dogfood-install 완료
+  - 임의 TS/JS 워크스페이스 열림 (이 repo 가능)
+
+steps:
+  - step: 1
+    ui: Command Palette
+    action: "Codingland: Show Panel Log"
+    expect: Panel 준비 (이후 ingest 로그 확인용)
+
+  - step: 2
+    ui: Command Palette
+    action: "Codingland: Scan Workspace"
+    expect: |
+      Progress notification; Panel에 "ingest full scan" / "ingest complete - N files, M nodes"
+      node_modules·out·dist 경로는 스킵
+
+  - step: 3
+    ui: Command Palette
+    action: "Codingland: Open Canvas"
+    expect: |
+      Beside에 Canvas; boundary zoom에 module/class 노드
+      샘플 로드 없이 그래프가 보임 (Scan 후)
+
+  - step: 4
+    ui: Canvas
+    action: 그래프 노드 클릭
+    expect: Beside에 해당 파일 reveal (editor.revealBeside)
+
+  - step: 5
+    ui: Canvas
+    action: Zoom → function / detail
+    expect: zoom-label 변경; 노드 세트 morph (랜드마크 점프 없음 목표)
+
+  - step: 6
+    ui: Canvas
+    action: Time Bar scrub / Hot Reboot
+    expect: Panel에 timeline.onChangeEnd; Hot Reboot 메시지
+
+success_criteria: |
+  ROADMAP M4 / Leantime #1294:
+  임의 TS/JS 워크스페이스 → Open Canvas → 경계 그래프 + Beside; 외부 Graphify 없음
+
+evidence: "qa: e2e pass scenario=dogfood-m4-workflow evidence=screenshot+panel log"
