@@ -88,13 +88,13 @@
 
 ```bash
 npm install          # workspaces: core + host
-npm test             # core Jest + host Jest (EH-free merge)
+npm test             # core Jest + host Jest (EH-free merge) + xvfbGuard node:test
 npm run compile      # core dist/ then host out/
-npm run ci           # install + compile + unit tests (AA clean_code)
+npm run ci           # npm test + test:vscode (AA clean_code)
 npm run package:vsix # stage + vsce → host/codingland-0.0.1.vsix
 npm run test:vscode  # full compile + Extension Host smoke (@vscode/test-cli)
 # Linux headless Pod/CI: needs xvfb + Electron libs (libgtk-3-0, libnss3, libgbm1, libasound2, …);
-# wrapper auto-uses xvfb-run when DISPLAY is empty.
+# wrapper auto-uses xvfb-run when DISPLAY is empty; soft-skips (exit 0) if xvfb-run missing.
 # Optional: VSCODE_EXECUTABLE_PATH=/path/to/code|codium  (skips download; preferred in locked-down CI)
 # If update.code.visualstudio.com is unreachable, script falls back to GitHub VSCodium.
 ```
@@ -105,6 +105,6 @@ core만:
 npm test -w @codingland/core
 ```
 
-QA 게이트(테넌트): 저장소 루트 [`.factory/quality.yaml`](../.factory/quality.yaml) `e2e.command` → `npm --prefix extension run test:vscode` (브라우저 `base_url` 아님). `test:vscode`는 **core를 먼저** 컴파일한 뒤 host를 빌드한다(클린 sync에서 `@codingland/core` 해석 실패 방지). AA 주간 NF: 같은 파일 `clean_code.command` → `npm --prefix extension run ci` (install+compile+core Jest). 시나리오 메모: [`e2e/scenarios/`](../e2e/scenarios/).
+QA 게이트(테넌트): 저장소 루트 [`.factory/quality.yaml`](../.factory/quality.yaml) `e2e.command` → `npm --prefix extension run test:vscode` (브라우저 `base_url` 아님). `test:vscode`는 **core를 먼저** 컴파일한 뒤 host를 빌드한다(클린 sync에서 `@codingland/core` 해석 실패 방지). AA 주간 NF: 같은 파일 `clean_code.command` → `npm --prefix extension run ci` (unit + EH; EH soft-skip without xvfb). 시나리오 메모: [`e2e/scenarios/`](../e2e/scenarios/).
 
 VS Code/Cursor에 로컬 로드·VSIX 설치: [`../deploy/README.md`](../deploy/README.md). Host 커맨드 `codingland.scanWorkspace`는 Extension Development Host에서 실행.
