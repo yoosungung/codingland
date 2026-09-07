@@ -3,28 +3,26 @@ import {
   ProtocolEvents,
   PAYMENT_MIDDLEWARE_FILE,
   PAYMENT_MIDDLEWARE_SOURCE,
-  IsolatedRunner,
-  applyGraphDelta,
   applySemanticZoom,
   extractGraphFromSource,
   type GraphDelta,
   type GraphNode,
   type GraphSnapshot,
-  type RuntimeSnapshot,
   type ZoomLevel,
 } from "@codingland/core";
 import { revealBeside } from "./revealBeside";
 import { getPanel } from "./panel";
+import { RunnerTape } from "./runnerTape";
+import { mergeWorkspaceDelta } from "./workspaceGraphMerge";
 
 /** Cap DOM nodes posted to Canvas webview (avoid EH freeze on huge graphs). */
 export const MAX_CANVAS_NODES = 500;
 
-/** Canvas graph + runner + timeline state (M4 workspace ingest target). */
+/** Canvas graph + panel + webview routing (demo runner tape lives in RunnerTape). */
 export class CanvasSession {
   private panel: vscode.WebviewPanel | undefined;
   private fullSnapshot: GraphSnapshot | undefined;
-  private runner: IsolatedRunner | undefined;
-  private timeline: RuntimeSnapshot[] = [];
+  private readonly tape = new RunnerTape();
 
   hasPanel(): boolean {
     return this.panel !== undefined;
@@ -107,18 +105,11 @@ export class CanvasSession {
 
   /** Apply incremental ingest delta to Canvas (M4 onDidSave / watcher). */
   async applyWorkspaceDelta(delta: GraphDelta): Promise<void> {
-    if (!this.fullSnapshot) {
-      this.fullSnapshot = {
-        nodes: [],
-        edges: [],
-        zoomLevel: delta.zoomLevel ?? "boundary",
-      };
-    }
-    const merged = applyGraphDelta(this.fullSnapshot, delta);
-    this.fullSnapshot = merged;
+    this.fullSnapshot = mergeWorkspaceDelta(this.fullSnapshot, delta);
     if (!this.panel) {
       return;
     }
+    const merged = this.fullSnapshot;
     const view = applySemanticZoom(merged, merged.zoomLevel);
     await this.panel.webview.postMessage({
       type: ProtocolEvents.GRAPH_DELTA,
@@ -132,35 +123,18 @@ export class CanvasSession {
     });
   }
 
-  ensureRunner(): IsolatedRunner {
-    if (!this.runner) {
-      const runner = new IsolatedRunner({
-        mockIo: {
-          http: (req) => ({ status: 200, body: req }),
-        },
-      });
-      runner.recordCall("fp-charge", { amount: 10 }, "call");
-      runner.recordCall("fp-auth", { token: "live-token" }, "call");
-      runner.recordCall("fp-exception", { err: "boom" }, "exception");
-      runner.checkpoint("cp-before-exception");
-      this.runner = runner;
-      this.timeline = runner.snapshots();
-    }
-    return this.runner;
-  }
-
   async pushTimeline(): Promise<void> {
     if (!this.panel) {
       return;
     }
     await this.panel.webview.postMessage({
       type: ProtocolEvents.TIMELINE_CACHE,
-      payload: this.timeline,
+      payload: this.tape.snapshots(),
     });
   }
 
   async onPanelReady(): Promise<void> {
-    this.ensureRunner();
+    this.tape.ensureRunner();
     await this.pushTimeline();
     if (this.fullSnapshot) {
       await this.pushDelta();
@@ -173,8 +147,7 @@ export class CanvasSession {
     }
     const typed = msg as { type?: string; payload?: unknown };
     if (typed.type === ProtocolEvents.RUNNER_HOT_REBOOT) {
-      const result = this.ensureRunner().hotReboot();
-      this.timeline = result.snapshots;
+      const result = this.tape.hotReboot();
       await this.pushTimeline();
       void vscode.window.showInformationMessage(
         result.ok
