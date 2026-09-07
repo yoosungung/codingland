@@ -13,18 +13,10 @@ const https = require("https");
 const { createWriteStream } = require("fs");
 const { pipeline } = require("stream/promises");
 const { execFileSync } = require("child_process");
+const { existsExec, softSkipDecision } = require("./xvfbGuard.cjs");
 
 const hostDir = path.join(__dirname, "..", "host");
 const cacheRoot = path.join(hostDir, ".vscode-test");
-
-function existsExec(p) {
-  try {
-    fs.accessSync(p, fs.constants.X_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 function findBinary(dir, names) {
   for (const name of names) {
@@ -146,6 +138,12 @@ async function resolveExecutable() {
 }
 
 async function main() {
+  const decision = softSkipDecision();
+  if (decision.skip) {
+    console.error(decision.reason);
+    process.exit(0);
+  }
+
   const executable = await resolveExecutable();
   process.env.VSCODE_EXECUTABLE_PATH = executable;
   console.error(`[test:vscode] using ${executable}`);

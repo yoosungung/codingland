@@ -8,7 +8,10 @@
 |------|------|
 | `core/` | 순수 TS (`vscode` import 금지). Graph·GraphStore·AST/KG·Debt·layout·Sanitizer·IsolatedRunner·Living Spec·ChangeScore·Gate |
 | `host/` | VS Code 어댑터. Sidebar·Custom Editor·Panel·Beside·Time Bar·Hot Reboot·Workspace Ingest 스케줄·commands |
+| `host/src/canvasSession.ts` | Canvas graph + panel + webview 라우팅 (ingest 공개 시그니처 유지) |
 | `host/src/canvasViewDelta.ts` | zoom + `MAX_CANVAS_NODES` cap + `truncated` (`pushDelta` / `applyWorkspaceDelta` 공유) |
+| `host/src/runnerTape.ts` | demo IsolatedRunner tape (`ensureRunner` / `hotReboot` / timeline) |
+| `host/src/workspaceGraphMerge.ts` | `applyWorkspaceDelta` merge (EH-free unit-testable) |
 
 워크스페이스 루트는 `extension/package.json` (npm workspaces).
 
@@ -86,13 +89,13 @@
 
 ```bash
 npm install          # workspaces: core + host
-npm test             # core Jest + host Jest (EH-free canvas view cap)
+npm test             # core Jest + host Jest (EH-free merge/cap) + xvfbGuard node:test
 npm run compile      # core dist/ then host out/
-npm run ci           # install + compile + unit tests (AA clean_code)
+npm run ci           # npm test + test:vscode (AA clean_code; EH soft-skip without xvfb)
 npm run package:vsix # stage + vsce → host/codingland-0.0.1.vsix
 npm run test:vscode  # full compile + Extension Host smoke (@vscode/test-cli)
 # Linux headless Pod/CI: needs xvfb + Electron libs (libgtk-3-0, libnss3, libgbm1, libasound2, …);
-# wrapper auto-uses xvfb-run when DISPLAY is empty.
+# wrapper auto-uses xvfb-run when DISPLAY is empty; soft-skips (exit 0) if xvfb-run missing.
 # Optional: VSCODE_EXECUTABLE_PATH=/path/to/code|codium  (skips download; preferred in locked-down CI)
 # If update.code.visualstudio.com is unreachable, script falls back to GitHub VSCodium.
 ```
@@ -103,6 +106,6 @@ core만:
 npm test -w @codingland/core
 ```
 
-QA 게이트(테넌트): 저장소 루트 [`.factory/quality.yaml`](../.factory/quality.yaml) `e2e.command` → `npm --prefix extension run test:vscode` (브라우저 `base_url` 아님). `test:vscode`는 **core를 먼저** 컴파일한 뒤 host를 빌드한다(클린 sync에서 `@codingland/core` 해석 실패 방지). AA 주간 NF: 같은 파일 `clean_code.command` → `npm --prefix extension run ci` (install+compile+unit). 시나리오 메모: [`e2e/scenarios/`](../e2e/scenarios/).
+QA 게이트(테넌트): 저장소 루트 [`.factory/quality.yaml`](../.factory/quality.yaml) `e2e.command` → `npm --prefix extension run test:vscode` (브라우저 `base_url` 아님). `test:vscode`는 **core를 먼저** 컴파일한 뒤 host를 빌드한다(클린 sync에서 `@codingland/core` 해석 실패 방지). AA 주간 NF: 같은 파일 `clean_code.command` → `npm --prefix extension run ci` (unit + EH; EH soft-skip without xvfb). 시나리오 메모: [`e2e/scenarios/`](../e2e/scenarios/).
 
 VS Code/Cursor에 로컬 로드·VSIX 설치: [`../deploy/README.md`](../deploy/README.md). Host 커맨드 `codingland.scanWorkspace`는 Extension Development Host에서 실행.
