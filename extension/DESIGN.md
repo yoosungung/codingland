@@ -8,9 +8,6 @@
 |------|------|
 | `core/` | 순수 TS (`vscode` import 금지). Graph·GraphStore·AST/KG·Debt·layout·Sanitizer·IsolatedRunner·Living Spec·ChangeScore·Gate |
 | `host/` | VS Code 어댑터. Sidebar·Custom Editor·Panel·Beside·Time Bar·Hot Reboot·Workspace Ingest 스케줄·commands |
-| `host/src/canvasSession.ts` | Canvas graph + panel + webview 라우팅 (ingest 공개 시그니처 유지) |
-| `host/src/runnerTape.ts` | demo IsolatedRunner tape (`ensureRunner` / `hotReboot` / timeline) |
-| `host/src/workspaceGraphMerge.ts` | `applyWorkspaceDelta` merge (EH-free unit-testable) |
 
 워크스페이스 루트는 `extension/package.json` (npm workspaces).
 
