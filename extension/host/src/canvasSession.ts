@@ -5,7 +5,6 @@ import {
   PAYMENT_MIDDLEWARE_SOURCE,
   IsolatedRunner,
   applyGraphDelta,
-  applySemanticZoom,
   extractGraphFromSource,
   type GraphDelta,
   type GraphNode,
@@ -15,9 +14,9 @@ import {
 } from "@codingland/core";
 import { revealBeside } from "./revealBeside";
 import { getPanel } from "./panel";
+import { buildCanvasViewDelta } from "./canvasViewDelta";
 
-/** Cap DOM nodes posted to Canvas webview (avoid EH freeze on huge graphs). */
-export const MAX_CANVAS_NODES = 500;
+export { MAX_CANVAS_NODES } from "./canvasViewDelta";
 
 /** Canvas graph + runner + timeline state (M4 workspace ingest target). */
 export class CanvasSession {
@@ -80,19 +79,10 @@ export class CanvasSession {
       return;
     }
     const level = zoomLevel ?? full.zoomLevel;
-    const view = applySemanticZoom(full, level);
     this.fullSnapshot = { ...full, zoomLevel: level };
-    const nodes = view.nodes.slice(0, MAX_CANVAS_NODES);
     await this.panel.webview.postMessage({
       type: ProtocolEvents.GRAPH_DELTA,
-      payload: {
-        upsertNodes: nodes,
-        upsertEdges: view.edges,
-        removeNodeIds: [],
-        removeEdgeIds: [],
-        zoomLevel: view.zoomLevel,
-        truncated: view.nodes.length > MAX_CANVAS_NODES,
-      },
+      payload: buildCanvasViewDelta(this.fullSnapshot, level),
     });
   }
 
@@ -114,22 +104,9 @@ export class CanvasSession {
         zoomLevel: delta.zoomLevel ?? "boundary",
       };
     }
-    const merged = applyGraphDelta(this.fullSnapshot, delta);
-    this.fullSnapshot = merged;
-    if (!this.panel) {
-      return;
-    }
-    const view = applySemanticZoom(merged, merged.zoomLevel);
-    await this.panel.webview.postMessage({
-      type: ProtocolEvents.GRAPH_DELTA,
-      payload: {
-        upsertNodes: (delta.upsertNodes ?? []).slice(0, MAX_CANVAS_NODES),
-        upsertEdges: delta.upsertEdges ?? [],
-        removeNodeIds: delta.removeNodeIds ?? [],
-        removeEdgeIds: delta.removeEdgeIds ?? [],
-        zoomLevel: view.zoomLevel,
-      },
-    });
+    this.fullSnapshot = applyGraphDelta(this.fullSnapshot, delta);
+    // Same zoom+cap+truncated path as full push (DOM view tracks capped snapshot).
+    await this.pushDelta();
   }
 
   ensureRunner(): IsolatedRunner {
