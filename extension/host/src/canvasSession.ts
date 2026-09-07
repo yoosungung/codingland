@@ -3,7 +3,6 @@ import {
   ProtocolEvents,
   PAYMENT_MIDDLEWARE_FILE,
   PAYMENT_MIDDLEWARE_SOURCE,
-  applySemanticZoom,
   extractGraphFromSource,
   type GraphDelta,
   type GraphNode,
@@ -12,11 +11,11 @@ import {
 } from "@codingland/core";
 import { revealBeside } from "./revealBeside";
 import { getPanel } from "./panel";
+import { buildCanvasViewDelta } from "./canvasViewDelta";
 import { RunnerTape } from "./runnerTape";
 import { mergeWorkspaceDelta } from "./workspaceGraphMerge";
 
-/** Cap DOM nodes posted to Canvas webview (avoid EH freeze on huge graphs). */
-export const MAX_CANVAS_NODES = 500;
+export { MAX_CANVAS_NODES } from "./canvasViewDelta";
 
 /** Canvas graph + panel + webview routing (demo runner tape lives in RunnerTape). */
 export class CanvasSession {
@@ -78,19 +77,10 @@ export class CanvasSession {
       return;
     }
     const level = zoomLevel ?? full.zoomLevel;
-    const view = applySemanticZoom(full, level);
     this.fullSnapshot = { ...full, zoomLevel: level };
-    const nodes = view.nodes.slice(0, MAX_CANVAS_NODES);
     await this.panel.webview.postMessage({
       type: ProtocolEvents.GRAPH_DELTA,
-      payload: {
-        upsertNodes: nodes,
-        upsertEdges: view.edges,
-        removeNodeIds: [],
-        removeEdgeIds: [],
-        zoomLevel: view.zoomLevel,
-        truncated: view.nodes.length > MAX_CANVAS_NODES,
-      },
+      payload: buildCanvasViewDelta(this.fullSnapshot, level),
     });
   }
 
@@ -106,21 +96,8 @@ export class CanvasSession {
   /** Apply incremental ingest delta to Canvas (M4 onDidSave / watcher). */
   async applyWorkspaceDelta(delta: GraphDelta): Promise<void> {
     this.fullSnapshot = mergeWorkspaceDelta(this.fullSnapshot, delta);
-    if (!this.panel) {
-      return;
-    }
-    const merged = this.fullSnapshot;
-    const view = applySemanticZoom(merged, merged.zoomLevel);
-    await this.panel.webview.postMessage({
-      type: ProtocolEvents.GRAPH_DELTA,
-      payload: {
-        upsertNodes: (delta.upsertNodes ?? []).slice(0, MAX_CANVAS_NODES),
-        upsertEdges: delta.upsertEdges ?? [],
-        removeNodeIds: delta.removeNodeIds ?? [],
-        removeEdgeIds: delta.removeEdgeIds ?? [],
-        zoomLevel: view.zoomLevel,
-      },
-    });
+    // Same zoom+cap+truncated path as full push (DOM view tracks capped snapshot).
+    await this.pushDelta();
   }
 
   async pushTimeline(): Promise<void> {

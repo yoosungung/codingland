@@ -9,7 +9,6 @@
     "test": "npm test -w @codingland/core && npm test -w codingland && node --test ./scripts/xvfbGuard.test.cjs",
     "compile": "npm run compile -w @codingland/core && npm run compile -w codingland",
     "test:vscode": "npm run compile && node ./scripts/run-vscode-test.cjs",
-    "ci": "npm test && npm run test:vscode",
     "package:vsix": "npm run compile && node ./scripts/package-vsix.cjs"
   }
 }
