@@ -8,6 +8,9 @@
 |------|------|
 | `core/` | 순수 TS (`vscode` import 금지). Graph·GraphStore·AST/KG·Debt·layout·Sanitizer·IsolatedRunner·Living Spec·ChangeScore·Gate |
 | `host/` | VS Code 어댑터. Sidebar·Custom Editor·Panel·Beside·Time Bar·Hot Reboot·Workspace Ingest 스케줄·commands |
+| `host/src/canvasSession.ts` | Canvas graph + panel + webview 라우팅 (ingest 공개 시그니처 유지) |
+| `host/src/runnerTape.ts` | demo IsolatedRunner tape (`ensureRunner` / `hotReboot` / timeline) |
+| `host/src/workspaceGraphMerge.ts` | `applyWorkspaceDelta` merge (EH-free unit-testable) |
 
 워크스페이스 루트는 `extension/package.json` (npm workspaces).
 
@@ -85,9 +88,9 @@
 
 ```bash
 npm install          # workspaces: core + host
-npm test             # core Jest
+npm test             # core Jest + host Jest (EH-free merge)
 npm run compile      # core dist/ then host out/
-npm run ci           # install + compile + core Jest (AA clean_code)
+npm run ci           # install + compile + unit tests (AA clean_code)
 npm run package:vsix # stage + vsce → host/codingland-0.0.1.vsix
 npm run test:vscode  # full compile + Extension Host smoke (@vscode/test-cli)
 # Linux headless Pod/CI: needs xvfb + Electron libs (libgtk-3-0, libnss3, libgbm1, libasound2, …);
