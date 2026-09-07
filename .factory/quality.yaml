@@ -2,14 +2,20 @@
 # QA uses Extension Host smoke — not a web browser base_url.
 # See wiki: inbox/pm/2026-08-12-vscode-extension-qa-gate.md
 # and wiki/Engineering/AI-Native-Engineering/Tenant-Quality-Yaml-Gate-Skip-Pattern.md
+#
+# Extension Host smoke (e2e / ci → test:vscode) on Linux headless needs xvfb-run
+# (or a real DISPLAY). When xvfb-run is absent, run-vscode-test.cjs soft-skips EH
+# with a clear stderr message and exit 0 so clean_code still keeps unit npm test
+# as the always-on mechanical floor. Install xvfb in NF/CI images to enforce EH.
 
 e2e:
-  # Not a web base_url — Extension Host command gate
+  # Not a web base_url — Extension Host command gate (requires xvfb/DISPLAY on Linux headless)
   command: "npm --prefix extension run test:vscode"
   scenarios_path: e2e/scenarios
 
 # Weekly AA (aa-clean-weekly). Mechanical TS gate — not security-review.
 # Findings → New tickets on codingland Leantime project. No load/opik (extension Non-goal).
+# Includes test:vscode; EH soft-skips without xvfb (see header). Unit failure still fails ci.
 clean_code:
   command: "npm --prefix extension run ci"
   focus_paths: ["extension/core/", "extension/host/"]
