@@ -25,7 +25,7 @@
 ## M3.1 범위 (완료)
 
 - core: Sanitizer 단위/회귀 테스트 보강 (AST/이름 + depth≤3); `resolveMirrorAdapter` — 기본 **local**(Heuristic), `cloudOptIn`일 때만 Cloud 경로; Cloud 경로 입력은 Sanitizer 필수
-- host: `codingland.mirror.cloudOptIn` (default `false`) + GateHost가 어댑터 선택
+- host: `codingland.mirror.cloudOptIn` (default `false`) + GateHost가 어댑터 선택; host Jest `gateHost.test.ts`가 `trigger`의 GATE_TRIGGER tier·local/cloud 선택 커버 (`FULL_TIER_WALKTHROUGH_FINGERPRINTS`)
 - ChangeScore/#544: 실험값을 ROADMAP·이 문서 확정 표의 **고정 후보**로 승격(최종 dogfood 확정은 M5+)
 - **Non-goals**: 실클라우드 HTTP/API 키; 외부 Graphify CLI
 

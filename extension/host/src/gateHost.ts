@@ -19,6 +19,9 @@ export interface TriggerGateArgs extends Partial<ChangeScoreInput> {
   cloudOptIn?: boolean;
 }
 
+/** In-process full-tier walkthrough fixture fingerprints (host unit/smoke). */
+export const FULL_TIER_WALKTHROUGH_FINGERPRINTS = ["fp-entry", "fp-exit"] as const;
+
 /**
  * Host Gate adapter — command-driven (SCM/husky undecided; default: command).
  * Posts gate.* protocol events to Sidebar and logs tiers to Panel.
@@ -71,6 +74,7 @@ export class GateHost {
       },
     });
 
+    const fingerprints = [...FULL_TIER_WALKTHROUGH_FINGERPRINTS];
     const result = await runGateSmoke({
       scoreInput,
       uris: uriList,
@@ -80,7 +84,7 @@ export class GateHost {
       walkthrough:
         score.tier === "full"
           ? {
-              fingerprints: ["fp-entry", "fp-exit"],
+              fingerprints,
               summary: args.summary ?? "in-process path hint",
               pathNodeIds: ["entry", "exit"],
             }
@@ -91,7 +95,7 @@ export class GateHost {
       this.sidebar.postGate({
         type: ProtocolEvents.GATE_WALKTHROUGH,
         payload: {
-          fingerprints: ["fp-entry", "fp-exit"],
+          fingerprints,
           summary: args.summary ?? "in-process path hint",
         },
       });
