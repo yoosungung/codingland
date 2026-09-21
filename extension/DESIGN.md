@@ -80,7 +80,7 @@
 | Beside | `codingland.revealBeside` → `ViewColumn.Beside` (+ selection range) |
 | Time Bar / Hot Reboot | scrub → `timeline.onChangeEnd`; button → `runner.hotReboot` |
 | Sample | `codingland.loadPaymentSample` — fixture 그래프 → `graph.delta` (회귀) |
-| Ingest (M4) | `codingland.scanWorkspace` + 열기 시 백그라운드 스캔 → GraphStore → `graph.delta` |
+| Ingest (M4) | `codingland.scanWorkspace` + 열기 시 백그라운드 스캔 → GraphStore → `graph.delta`. 완료 로그의 파일 수는 `ingestUri`가 delta를 반환한 경우만. 읽기/파싱 실패는 `skipped`로 남긴다(제외 glob은 둘 다 아님). |
 | Mirror Gate | `codingland.triggerGate` — ChangeScore→session→Sidebar/Panel; Heuristic / Ollama(M5) / Cloud opt-in |
 
 ## Commands

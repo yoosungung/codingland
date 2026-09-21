@@ -92,6 +92,7 @@ export class WorkspaceIngestHost {
     );
 
     let done = 0;
+    let skipped = 0;
     for (const uri of uris) {
       if (options.cancellation?.isCancellationRequested) {
         panel.appendLine("[codingland] ingest scan cancelled");
@@ -101,14 +102,18 @@ export class WorkspaceIngestHost {
       if (isExcludedPath(relativePath)) {
         continue;
       }
-      await this.ingestUri(uri, { pushCanvas: false });
-      done += 1;
+      const delta = await this.ingestUri(uri, { pushCanvas: false });
+      if (delta) {
+        done += 1;
+      } else {
+        skipped += 1;
+      }
       options.onProgress?.(done, uris.length, uri.toString());
     }
 
     await CanvasEditorProvider.setWorkspaceGraph(this.store.graph);
     panel.appendLine(
-      `[codingland] ingest complete - ${done} files, ${this.store.graph.nodes.length} nodes`
+      `[codingland] ingest complete - ${done} files, ${skipped} skipped, ${this.store.graph.nodes.length} nodes`
     );
     return this.store.graph;
   }
